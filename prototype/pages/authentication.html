@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login y Registro para Bank D&G">
+    <title>Bank D&G - Login</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="../assets/css/authentication.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Login -->
+        <div class="form-box login">
+            <form id="loginForm" novalidate>
+                <h1>Login</h1>
+                <div class="input-box">
+                    <label for="login-username" class="visually-hidden">Usuario</label>
+                    <input id="login-username" type="text" placeholder="Username" value="user" required>
+                    <i class='bx bx-user'></i>
+                </div>
+                <div class="input-box">
+                    <label for="login-password" class="visually-hidden">Contraseña</label>
+                    <input id="login-password" type="password" placeholder="Password" value="123" required>
+                    <i class='bx bx-lock toggle-password' id="toggleLoginPassword"></i>
+                </div>
+                <div class="forgot-link">
+                    <a href="#" id="openRecover">¿Olvidó su contraseña?</a>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <p id="login-error" class="error-message" aria-live="polite"></p>
+            </form>
+        </div>
+
+        <!-- Registro -->
+        <div class="form-box register">
+            <form id="registerForm" novalidate>
+                <h1>Registro</h1>
+
+                <div class="input-box">
+                    <label for="idType">Tipo de identificación</label>
+                    <select id="idType" required>
+                        <option value="">Seleccione...</option>
+                        <option value="nacional">Nacional</option>
+                        <option value="dimex">DIMEX</option>
+                        <option value="pasaporte">Pasaporte</option>
+                    </select>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="idNumber">Número de identificación</label>
+                    <input id="idNumber" type="text" required placeholder="Ingrese número">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="register-username">Username</label>
+                    <input id="register-username" type="text" required placeholder="4–20 caracteres">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="fullname">Nombre completo</label>
+                    <input id="fullname" type="text" required placeholder="Nombre y apellidos">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="birthdate">Fecha de nacimiento</label>
+                    <input id="birthdate" type="date" required>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="email">Correo electrónico</label>
+                    <input id="email" type="email" required placeholder="ejemplo@correo.com">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="phone">Teléfono (opcional)</label>
+                    <input id="phone" type="tel" placeholder="+506 ####-####">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="register-password" class="visually-hidden">Contraseña</label>
+                    <input id="register-password" type="password" required placeholder="Mínimo 8 caracteres">
+                    <i class='bx bx-lock toggle-password' id="toggleRegisterPassword"></i>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="confirm-password" class="visually-hidden">Confirmar contraseña</label>
+                    <input id="confirm-password" type="password" required placeholder="Repetir contraseña">
+                    <i class='bx bx-lock toggle-password' id="toggleRegisterConfirmPassword"></i>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="terms">
+                    <input type="checkbox" id="acceptTerms" disabled>
+                    <label for="acceptTerms">
+                        Acepto los
+                        <a href="#" id="viewTerms" class="terms-link">Términos y Condiciones</a>
+                    </label>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <button type="submit" id="registerBtn" class="btn" disabled>Registrar</button>
+                <p id="register-error" class="error-message" aria-live="polite"></p>
+            </form>
+        </div>
+
+        <!-- Panel toggle -->
+        <div class="toggle-box">
+            <div class="toggle-panel toggle-left">
+                <h1>¡Bienvenido!</h1>
+                <p>¿No tienes cuenta?</p>
+                <button class="btn register-btn">Registrarse</button>
+            </div>
+            <div class="toggle-panel toggle-right">
+                <h1>¡Nos alegra verte!</h1>
+                <p>¿Ya tienes cuenta?</p>
+                <button class="btn login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Términos -->
+    <div id="termsModal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <h2>Términos y Condiciones</h2>
+            <iframe src="/prototype/assets/docs/terminos.pdf" title="Términos y Condiciones"></iframe>
+            <div class="terms-btns">
+                <button id="acceptTermsBtn" class="btn">Aceptar</button>
+                <button id="declineTermsBtn" class="btn">Rechazar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recuperar Contraseña -->
+    <div id="recoverModal" class="modal" aria-hidden="true">
+        <div class="modal-content recover">
+            <button class="close-modal" id="closeRecover">&times;</button>
+            <h2>Recuperar contraseña</h2>
+
+            <!-- Barra de progreso -->
+            <div class="progress-bar">
+                <div class="step active">Identificación</div>
+                <div class="step">Verificación</div>
+                <div class="step">Nueva contraseña</div>
+                <div class="step">Confirmación</div>
+            </div>
+
+            <!-- Paso 1 -->
+            <div class="step-content" data-step="1">
+                <div class="input-box">
+                    <label for="recover-identifier">Usuario o correo</label>
+                    <input id="recover-identifier" type="text" required placeholder="Username o correo">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+                <button id="sendCodeBtn" class="btn">Enviar código</button>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="step-content" data-step="2" hidden>
+                <div class="input-box">
+                    <label for="recover-code">Código de verificación</label>
+                    <input id="recover-code" type="text" required placeholder="Ingresa el código">
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+                <div class="button-group">
+                    <button id="resendCodeBtn" class="btn-secondary">Reenviar código</button>
+                    <button id="verifyCodeBtn" class="btn">Verificar</button>
+                </div>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="step-content" data-step="3" hidden>
+                <div class="input-box">
+                    <label for="new-password">Nueva contraseña</label>
+                    <input id="new-password" type="password" required placeholder="Mínimo 8 caracteres">
+                    <i class='bx bx-lock toggle-password' id="toggleNewPassword"></i>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="confirm-new-password">Confirmar contraseña</label>
+                    <input id="confirm-new-password" type="password" required placeholder="Repite la contraseña">
+                    <i class='bx bx-lock toggle-password' id="toggleConfirmNewPassword"></i>
+                    <span class="error-message" aria-live="polite"></span>
+                </div>
+                <button id="changePasswordBtn" class="btn">Cambiar contraseña</button>
+            </div>
+
+            <!-- Paso 4 -->
+            <div class="step-content" data-step="4" hidden>
+                <p class="success-msg">Tu contraseña ha sido restablecida con éxito.</p>
+                <button id="goToLoginBtn" class="btn">Volver al login</button>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="recoverLoading" hidden>
+                <p id="loadingText">Procesando<span id="dots">...</span></p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pantalla de confirmación -->
+    <div id="successModal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <h2>Registro exitoso 🎉</h2>
+            <p>Tu cuenta ha sido creada con éxito. Serás redirigido al login.</p>
+        </div>
+    </div>
+
+    <script type="module" src="../assets/js/authentication.js"></script>
+</body>
+
+</html>
