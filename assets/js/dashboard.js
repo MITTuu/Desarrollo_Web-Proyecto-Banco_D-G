@@ -139,21 +139,23 @@ function setupEventListeners() {
         });
     }
 
+    /*
     // Transfer cards
     const ownTransfer = document.getElementById('ownTransfer');
     const thirdPartyTransfer = document.getElementById('thirdPartyTransfer');
     
     if (ownTransfer) {
         ownTransfer.addEventListener('click', () => {
-            alert('Funcionalidad de transferencias entre cuentas propias');
+            //alert('Funcionalidad de transferencias entre cuentas propias');
         });
     }
     
     if (thirdPartyTransfer) {
         thirdPartyTransfer.addEventListener('click', () => {
-            alert('Funcionalidad de transferencias a terceros');
+            //alert('Funcionalidad de transferencias a terceros');
         });
     }
+    */
 }
 
 // ----------- Section Management -----------

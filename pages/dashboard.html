@@ -7,7 +7,9 @@
     <meta name="description" content="Dashboard - Bank D&G">
     <title>Bank D&G - Dashboard</title>
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="../assets/css/base.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/transactions.css">
 </head>
 
 <body>
@@ -194,28 +196,77 @@
 
                 <!-- Transfers Section -->
                 <section id="transfers-section" class="content-section">
-                    <div class="section-header">
-                        <h2>Transferencias</h2>
-                    </div>
-
+                    <!-- Selección tipo transferencia -->
                     <div class="transfers-options">
                         <div class="transfer-card" id="ownTransfer">
-                            <div class="transfer-icon">
-                                <i class='bx bx-transfer'></i>
-                            </div>
+                            <div class="transfer-icon"><i class='bx bx-transfer'></i></div>
                             <h3>Entre mis cuentas</h3>
                             <p>Transfiere entre tus cuentas propias</p>
                         </div>
-
                         <div class="transfer-card" id="thirdPartyTransfer">
-                            <div class="transfer-icon">
-                                <i class='bx bx-send'></i>
-                            </div>
+                            <div class="transfer-icon"><i class='bx bx-send'></i></div>
                             <h3>A terceros</h3>
                             <p>Envía dinero a otras personas</p>
                         </div>
                     </div>
+
+                    <!-- Botón volver -->
+                    <button id="backBtn" class="btn-secondary" style="display:none; margin-top:1rem;">Volver</button>
+
+                    <!-- Formulario de transferencia -->
+                    <div class="transfer-form-container" style="display:none; margin-top:2rem;">
+                        <label for="fromAccount">Cuenta origen</label>
+                        <select id="fromAccount"></select>
+
+                        <!-- Detalle de cuenta -->
+                        <div id="accountDetail" style="margin:0.5rem 0; padding:0.5rem; background:#f5f5f5; border-radius:4px; display:none;">
+                            <p><strong>Saldo disponible:</strong> <span id="detailBalance"></span></p>
+                            <p><strong>Tipo:</strong> <span id="detailType"></span></p>
+                            <p><strong>Moneda:</strong> <span id="detailCurrency"></span></p>
+                        </div>
+
+                        <label for="toAccount">Cuenta destino</label>
+                        <select id="toAccountSelect"></select>
+                        <input type="text" id="toAccountInput" placeholder="Número de cuenta"
+                            style="display:none; margin-top:0.5rem;">
+
+                        <label for="amount">Monto</label>
+                        <input type="number" id="amount" placeholder="0.00">
+
+                        <label for="concept">Concepto (opcional)</label>
+                        <input type="text" id="concept" placeholder="Pago / Transferencia">
+
+                        <button id="submitTransfer" class="btn-primary" style="justify-content: center;">Continuar</button>
+                    </div>
+
+                    <!-- Comprobante -->
+                    <div class="transfer-receipt" style="display:none; margin-top:2rem;">
+                        <h3>Comprobante</h3>
+                        <div class="receipt-content">
+                            <p><strong>De:</strong> <span id="receiptFrom"></span></p>
+                            <p><strong>Para:</strong> <span id="receiptTo"></span></p>
+                            <p><strong>Monto:</strong> <span id="receiptAmount"></span></p>
+                            <p><strong>Concepto:</strong> <span id="receiptConcept"></span></p>
+                            <p><strong>Fecha:</strong> <span id="receiptDate"></span></p>
+                        </div>
+                        <div class="comprobante-actions">
+                            <button id="downloadBtn">Descargar PDF</button>
+                            <button id="shareBtn">Compartir</button>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal hidden" id="modal">
+                        <div class="modal-content">
+                            <div id="modalMessage"></div>
+                            <div class="modal-actions">
+                                <button id="modalClose">Cerrar</button>
+                                <button id="modalConfirm" style="display:none;">Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
+
             </div>
         </main>
     </div>
@@ -229,6 +280,7 @@
     </div>
 
     <script type="module" src="../assets/js/dashboard.js"></script>
+    <script type="module" src="../assets/js/transactions.js"></script>
 </body>
 
 </html>
