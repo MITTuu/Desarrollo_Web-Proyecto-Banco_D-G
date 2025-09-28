@@ -3,6 +3,8 @@ import { getUserByName } from './get-data.js';
 let currentUser = null;
 let accounts = [];
 let transactions = [];
+let cards = [];
+let cardTransactions = [];
 
 // ----------- Data Loading -----------
 async function loadAccounts() {
@@ -27,6 +29,28 @@ async function loadTransactions() {
     }
 }
 
+async function loadCards() {
+    try {
+        const response = await fetch('../assets/data/cards.json');
+        if (!response.ok) throw new Error('No se pudo cargar cards.json');
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading cards:', error);
+        return [];
+    }
+}
+
+async function loadCardTransactions() {
+    try {
+        const response = await fetch('../assets/data/card-transactions.json');
+        if (!response.ok) throw new Error('No se pudo cargar card-transactions.json');
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading card transactions:', error);
+        return [];
+    }
+}
+
 // ----------- User Management -----------
 async function getCurrentUser() {
     // En una app real, esto vendría de localStorage o session
@@ -47,14 +71,18 @@ async function init() {
         }
 
         // Cargar datos
-        const [allAccounts, allTransactions] = await Promise.all([
+        const [allAccounts, allTransactions, allCards, allCardTransactions] = await Promise.all([
             loadAccounts(),
-            loadTransactions()
+            loadTransactions(),
+            loadCards(),
+            loadCardTransactions()
         ]);
 
-        // Filtrar cuentas del usuario actual
+        // Filtrar datos del usuario actual
         accounts = allAccounts.filter(account => account.propietario === currentUser.username);
         transactions = allTransactions;
+        cards = allCards.filter(card => card.propietario === currentUser.username);
+        cardTransactions = allCardTransactions;
 
         // Configurar UI
         setupUI();
@@ -65,11 +93,34 @@ async function init() {
         updateUserInfo();
         loadOverviewData();
         
+        // Manejar navegación con hash
+        handleHashNavigation();
+        
     } catch (error) {
         console.error('Error initializing dashboard:', error);
         showError('Error al cargar el dashboard');
     } finally {
         showLoading(false);
+    }
+}
+
+// ----------- Hash Navigation -----------
+function handleHashNavigation() {
+    const hash = window.location.hash.substring(1); // Remover el #
+    
+    if (hash) {
+        // Activar la sección correspondiente
+        showSection(hash);
+        
+        // Actualizar navegación activa
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        const targetNavLink = document.querySelector(`[data-section="${hash}"]`);
+        if (targetNavLink) {
+            targetNavLink.parentElement.classList.add('active');
+        }
     }
 }
 
@@ -280,7 +331,7 @@ function updateStats() {
     const monthlyIncome = document.getElementById('monthlyIncome');
     
     if (totalAccounts) totalAccounts.textContent = accounts.length;
-    if (totalCards) totalCards.textContent = '2'; // Mock data
+    if (totalCards) totalCards.textContent = cards.length;
     if (monthlyIncome) monthlyIncome.textContent = '+15.2%'; // Mock data
 }
 
@@ -297,11 +348,20 @@ function loadAccountsData() {
 }
 
 function loadCardsData() {
-    // Placeholder para tarjetas - se implementará en el módulo de tarjetas
     const cardsGrid = document.getElementById('cardsGrid');
     if (!cardsGrid) return;
     
-    cardsGrid.innerHTML = '<p>Módulo de tarjetas en desarrollo...</p>';
+    cardsGrid.innerHTML = '';
+    
+    if (cards.length === 0) {
+        cardsGrid.innerHTML = '<p class="no-data">No tienes tarjetas de crédito activas</p>';
+        return;
+    }
+    
+    cards.forEach(card => {
+        const cardElement = createCreditCard(card);
+        cardsGrid.appendChild(cardElement);
+    });
 }
 
 // ----------- UI Creation Functions -----------
@@ -387,6 +447,253 @@ function createAccountCard(account) {
     return card;
 }
 
+function createCreditCard(card) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'credit-card';
+    cardElement.style.background = card.gradiente;
+    
+    // Determinar el color del texto basado en el tipo de tarjeta
+    const textColor = card.tipo === 'Black' ? '#ffffff' : card.tipo === 'Platinum' ? '#333333' : '#333333';
+    
+    cardElement.innerHTML = `
+        <div class="credit-card-inner" style="color: ${textColor};">
+            <div class="card-header">
+                <div class="card-type-badge">${card.tipo}</div>
+                <div class="card-brand">Bank D&G</div>
+            </div>
+            
+            <div class="card-chip">
+                <div class="chip"></div>
+            </div>
+            
+            <div class="card-number">
+                ${card.numero_mascara}
+            </div>
+            
+            <div class="card-details">
+                <div class="card-holder">
+                    <div class="label">TITULAR</div>
+                    <div class="value">${card.titular}</div>
+                </div>
+                <div class="card-expiry">
+                    <div class="label">VÁLIDA HASTA</div>
+                    <div class="value">${card.exp}</div>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="card-balance">
+                    <div class="available">Disponible: ${formatCurrency(card.saldo_disponible, card.moneda)}</div>
+                    <div class="limit">Límite: ${formatCurrency(card.limite, card.moneda)}</div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-card-action btn-detail" data-card-id="${card.card_id}">
+                        <i class='bx bx-detail'></i>
+                    </button>
+                    <button class="btn-card-action btn-pin" data-card-id="${card.card_id}">
+                        <i class='bx bx-lock-open'></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Event listeners para los botones
+    const detailBtn = cardElement.querySelector('.btn-detail');
+    const pinBtn = cardElement.querySelector('.btn-pin');
+    
+    if (detailBtn) {
+        detailBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showCardDetail(card.card_id);
+        });
+    }
+    
+    if (pinBtn) {
+        pinBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            consultPin(card.card_id);
+        });
+    }
+    
+    // Event listener para toda la tarjeta
+    cardElement.addEventListener('click', () => {
+        showCardDetail(card.card_id);
+    });
+    
+    return cardElement;
+}
+
+// ----------- Card Functions -----------
+function showCardDetail(cardId) {
+    // Redirigir a la página de detalle con el ID de la tarjeta
+    window.location.href = `card-detail.html?cardId=${encodeURIComponent(cardId)}`;
+}
+
+function consultPin(cardId) {
+    const card = cards.find(c => c.card_id === cardId);
+    if (!card) return;
+    
+    showPinConsultModal(card);
+}
+
+// ----------- PIN Consultation Modal -----------
+function showPinConsultModal(card) {
+    // Crear modal dinámicamente
+    const modal = document.createElement('div');
+    modal.className = 'pin-modal';
+    modal.innerHTML = `
+        <div class="pin-modal-content">
+            <div class="pin-modal-header">
+                <h2>Consultar PIN</h2>
+                <button class="close-pin-modal">&times;</button>
+            </div>
+            
+            <div class="pin-steps">
+                <div class="pin-step active" data-step="1">
+                    <h3>Verificación de Identidad</h3>
+                    <p>Ingresa el código de verificación enviado a tu correo</p>
+                    <div class="code-sent-message" style="background: #d4edda; color: #155724; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #c3e6cb;">
+                        <i class='bx bx-check-circle'></i>
+                        <span>Código de verificación enviado a tu correo electrónico</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="pinVerificationCode" placeholder="Código de 6 dígitos" maxlength="6">
+                        <span class="error-message"></span>
+                    </div>
+                    <div class="pin-buttons">
+                        <button class="btn-secondary" onclick="resendPinCode()">Reenviar código</button>
+                        <button class="btn-primary" onclick="verifyPinCode('${card.card_id}')">Verificar</button>
+                    </div>
+                </div>
+                
+                <div class="pin-step" data-step="2">
+                    <h3>Información de la Tarjeta</h3>
+                    <div class="pin-card-info">
+                        <div class="pin-card-preview" style="background: ${card.gradiente};">
+                            <div class="pin-card-type">${card.tipo}</div>
+                            <div class="pin-card-number">${card.numero_mascara}</div>
+                        </div>
+                        <div class="pin-details">
+                            <div class="pin-detail-row">
+                                <span class="label">CVV:</span>
+                                <span class="value pin-sensitive" id="cardCvv">***</span>
+                            </div>
+                            <div class="pin-detail-row">
+                                <span class="label">PIN:</span>
+                                <span class="value pin-sensitive" id="cardPin">****</span>
+                                <button class="copy-btn" onclick="copyPin('${card.pin}')">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pin-timer">
+                        <span>Esta información se ocultará en: <span id="pinTimer">10</span> segundos</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pin-loading" style="display: none;">
+                <i class='bx bx-loader-alt'></i>
+                <p>Verificando código...</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Event listeners
+    const closeBtn = modal.querySelector('.close-pin-modal');
+    closeBtn.addEventListener('click', () => closePinModal(modal));
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closePinModal(modal);
+    });
+}
+
+// Global functions for PIN modal
+window.verifyPinCode = function(cardId) {
+    const code = document.getElementById('pinVerificationCode').value;
+    const errorSpan = document.querySelector('#pinVerificationCode + .error-message');
+    
+    if (code !== '123456') {
+        errorSpan.textContent = 'Código incorrecto. Intenta nuevamente.';
+        return;
+    }
+    
+    errorSpan.textContent = '';
+    
+    // Mostrar loading
+    const loading = document.querySelector('.pin-loading');
+    loading.style.display = 'block';
+    
+    setTimeout(() => {
+        loading.style.display = 'none';
+        showPinInformation(cardId);
+    }, 1500);
+};
+
+function showPinInformation(cardId) {
+    const card = cards.find(c => c.card_id === cardId);
+    if (!card) return;
+    
+    // Cambiar al paso 2
+    document.querySelector('.pin-step[data-step="1"]').classList.remove('active');
+    document.querySelector('.pin-step[data-step="2"]').classList.add('active');
+    
+    // Mostrar información
+    document.getElementById('cardCvv').textContent = card.cvv;
+    document.getElementById('cardPin').textContent = card.pin;
+    
+    // Iniciar timer de 10 segundos
+    let timer = 10;
+    const timerElement = document.getElementById('pinTimer');
+    
+    const interval = setInterval(() => {
+        timer--;
+        timerElement.textContent = timer;
+        
+        if (timer <= 0) {
+            clearInterval(interval);
+            // Ocultar información sensible
+            document.getElementById('cardCvv').textContent = '***';
+            document.getElementById('cardPin').textContent = '****';
+            document.querySelector('.pin-timer').innerHTML = '<span style="color: #e74c3c;">Información ocultada por seguridad</span>';
+        }
+    }, 1000);
+}
+
+window.resendPinCode = function() {
+    // Mostrar mensaje de reenvío en el modal
+    const codeMessage = document.querySelector('.code-sent-message');
+    if (codeMessage) {
+        // Cambiar temporalmente el mensaje
+        const originalContent = codeMessage.innerHTML;
+        codeMessage.innerHTML = `
+            <i class='bx bx-check-circle'></i>
+            <span>Código reenviado a tu correo electrónico</span>
+        `;
+        
+        // Volver al mensaje original después de 3 segundos
+        setTimeout(() => {
+            codeMessage.innerHTML = originalContent;
+        }, 3000);
+    }
+};
+
+window.copyPin = function(pin) {
+    navigator.clipboard.writeText(pin).then(() => {
+        alert('PIN copiado al portapapeles');
+    }).catch(() => {
+        alert('No se pudo copiar el PIN');
+    });
+};
+
+function closePinModal(modal) {
+    document.body.removeChild(modal);
+}
+
 // ----------- Helper Functions -----------
 function formatCurrency(amount, currency) {
     const symbol = currency === 'USD' ? '$' : '₡';
@@ -419,7 +726,8 @@ function showError(message) {
 
 // ----------- Placeholder Functions -----------
 function showAccountDetail(account) {
-    alert(`Mostrar detalle de cuenta: ${account.alias}\nSaldo: ${formatCurrency(account.saldo, account.moneda)}`);
+    // Redirigir a la página de detalle con el ID de la cuenta
+    window.location.href = `account-detail.html?accountId=${encodeURIComponent(account.account_id)}`;
 }
 
 function startTransfer(account) {
