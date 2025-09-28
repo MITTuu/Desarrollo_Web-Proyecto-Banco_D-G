@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detalle de Tarjeta - Bank D&G">
+    <title>Bank D&G - Detalle de Tarjeta</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/cards.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class='bx bx-bank'></i>
+                    <span>Bank D&G</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class='bx bx-user'></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-role">Cliente</span>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <i class='bx bx-home-alt'></i>
+                        <span>Resumen</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-wallet'></i>
+                        <span>Cuentas</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-credit-card'></i>
+                        <span>Tarjetas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class='bx bx-transfer'></i>
+                        <span>Transferencias</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class='bx bx-log-out'></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="mobile-header">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class='bx bx-menu'></i>
+                    </button>
+                    <div class="page-title">
+                        <div class="breadcrumb">
+                            <a href="dashboard.html">Dashboard</a>
+                            <i class='bx bx-chevron-right'></i>
+                            <span>Detalle de Tarjeta</span>
+                        </div>
+                        <h1 id="cardType">Cargando...</h1>
+                    </div>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn-primary" id="consultPinBtn">
+                        <i class='bx bx-lock-open'></i>
+                        Consultar PIN
+                    </button>
+                </div>
+            </header>
+
+            <!-- Card Header -->
+            <div class="card-header-section">
+                <div class="card-visual" id="cardVisual">
+                    <!-- Card will be rendered here -->
+                </div>
+                <div class="card-info-summary">
+                    <div class="card-status">
+                        <span class="status-badge active" id="cardStatus">Activa</span>
+                    </div>
+                    <div class="card-limits">
+                        <div class="limit-item">
+                            <div class="limit-label">Límite Total</div>
+                            <div class="limit-value" id="cardLimit">$15,000.00</div>
+                        </div>
+                        <div class="limit-item">
+                            <div class="limit-label">Disponible</div>
+                            <div class="limit-value available" id="cardAvailable">$11,749.25</div>
+                        </div>
+                        <div class="limit-item">
+                            <div class="limit-label">Consumido</div>
+                            <div class="limit-value consumed" id="cardConsumed">$3,250.75</div>
+                        </div>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill" id="usageBar"></div>
+                        <div class="usage-percentage" id="usagePercentage">21.7%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class='bx bx-search'></i>
+                    <input type="text" id="searchTransactions" placeholder="Buscar por descripción o comercio...">
+                </div>
+                <div class="filter-controls">
+                    <select id="typeFilter">
+                        <option value="">Todos los movimientos</option>
+                        <option value="COMPRA">Solo compras</option>
+                        <option value="PAGO">Solo pagos</option>
+                    </select>
+                    <select id="categoryFilter">
+                        <option value="">Todas las categorías</option>
+                        <option value="Alimentación">Alimentación</option>
+                        <option value="Combustible">Combustible</option>
+                        <option value="Compras Online">Compras Online</option>
+                        <option value="Tecnología">Tecnología</option>
+                        <option value="Restaurantes">Restaurantes</option>
+                        <option value="Entretenimiento">Entretenimiento</option>
+                        <option value="Viajes">Viajes</option>
+                        <option value="Oficina">Oficina</option>
+                        <option value="Pago">Pago</option>
+                    </select>
+                    <select id="dateFilter">
+                        <option value="">Todas las fechas</option>
+                        <option value="today">Hoy</option>
+                        <option value="week">Última semana</option>
+                        <option value="month">Último mes</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="transactions-section">
+                <div class="transactions-header">
+                    <h3>Historial de Movimientos</h3>
+                    <div class="results-info">
+                        <span id="transactionsCount">Cargando...</span>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState">
+                    <i class='bx bx-loader-alt'></i>
+                    <p>Cargando movimientos...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class='bx bx-credit-card'></i>
+                    <h4>No hay movimientos</h4>
+                    <p>No se encontraron transacciones que coincidan con los filtros aplicados.</p>
+                </div>
+
+                <!-- Error State -->
+                <div class="error-state" id="errorState" style="display: none;">
+                    <i class='bx bx-error-circle'></i>
+                    <h4>Error al cargar datos</h4>
+                    <p>Ocurrió un problema al cargar los movimientos. Por favor, intenta nuevamente.</p>
+                    <button class="btn-secondary" onclick="retryLoadTransactions()">Reintentar</button>
+                </div>
+
+                <!-- Transactions List -->
+                <div class="transactions-list" id="transactionsList">
+                    <!-- Transactions will be loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <button class="pagination-btn" id="prevBtn" disabled>
+                        <i class='bx bx-chevron-left'></i>
+                        Anterior
+                    </button>
+                    <div class="pagination-info">
+                        Página <span id="currentPage">1</span> de <span id="totalPages">1</span>
+                    </div>
+                    <button class="pagination-btn" id="nextBtn" disabled>
+                        Siguiente
+                        <i class='bx bx-chevron-right'></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="../assets/js/cards.js"></script>
+</body>
+
+</html>

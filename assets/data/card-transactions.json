@@ -1,0 +1,112 @@
+[
+  {
+    "id": "CTX-2024-092701-001",
+    "card_id": "CC-4532-1234-5678-9012",
+    "fecha": "2024-09-27T10:30:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Supermercado Mas x Menos",
+    "moneda": "CRC",
+    "monto": 45000.00,
+    "comercio": "SUPERMERCADO MAS X MENOS",
+    "categoria": "Alimentación"
+  },
+  {
+    "id": "CTX-2024-092702-002",
+    "card_id": "CC-4532-1234-5678-9012",
+    "fecha": "2025-09-26T18:45:00Z",
+    "tipo": "PAGO",
+    "descripcion": "Pago desde cuenta corriente",
+    "moneda": "CRC",
+    "monto": 150000.00,
+    "comercio": "BANK D&G PAYMENT",
+    "categoria": "Pago"
+  },
+  {
+    "id": "CTX-2024-092703-003",
+    "card_id": "CC-4532-1234-5678-9012",
+    "fecha": "2024-09-24T14:20:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Gasolinera Delta",
+    "moneda": "CRC",
+    "monto": 28000.00,
+    "comercio": "DELTA COMBUSTIBLES",
+    "categoria": "Combustible"
+  },
+  {
+    "id": "CTX-2024-092704-004",
+    "card_id": "CC-5412-9876-5432-1098",
+    "fecha": "2024-09-26T16:15:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Amazon Online Purchase",
+    "moneda": "USD",
+    "monto": 125.50,
+    "comercio": "AMAZON.COM",
+    "categoria": "Compras Online"
+  },
+  {
+    "id": "CTX-2024-092705-005",
+    "card_id": "CC-5412-9876-5432-1098",
+    "fecha": "2024-09-23T12:30:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Apple Store",
+    "moneda": "USD",
+    "monto": 999.00,
+    "comercio": "APPLE STORE ONLINE",
+    "categoria": "Tecnología"
+  },
+  {
+    "id": "CTX-2024-092706-006",
+    "card_id": "CC-5412-9876-5432-1098",
+    "fecha": "2024-09-20T09:45:00Z",
+    "tipo": "PAGO",
+    "descripcion": "Pago automático",
+    "moneda": "USD",
+    "monto": 500.00,
+    "comercio": "BANK D&G AUTO PAYMENT",
+    "categoria": "Pago"
+  },
+  {
+    "id": "CTX-2024-092707-007",
+    "card_id": "CC-4532-1234-5678-9012",
+    "fecha": "2024-09-22T20:15:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Restaurant Olive Garden",
+    "moneda": "CRC",
+    "monto": 35000.00,
+    "comercio": "OLIVE GARDEN ESCAZU",
+    "categoria": "Restaurantes"
+  },
+  {
+    "id": "CTX-2024-092708-008",
+    "card_id": "CC-5412-9876-5432-1098",
+    "fecha": "2024-09-19T11:20:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Netflix Subscription",
+    "moneda": "USD",
+    "monto": 15.99,
+    "comercio": "NETFLIX.COM",
+    "categoria": "Entretenimiento"
+  },
+  {
+    "id": "CTX-2024-092709-009",
+    "card_id": "CC-6011-1111-2222-3333",
+    "fecha": "2024-09-21T15:30:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Business Travel Booking",
+    "moneda": "USD",
+    "monto": 2500.00,
+    "comercio": "EXPEDIA CORPORATE",
+    "categoria": "Viajes"
+  },
+  {
+    "id": "CTX-2024-092710-010",
+    "card_id": "CC-6011-1111-2222-3333",
+    "fecha": "2024-09-18T13:45:00Z",
+    "tipo": "COMPRA",
+    "descripcion": "Office Equipment",
+    "moneda": "USD",
+    "monto": 1200.00,
+    "comercio": "OFFICE DEPOT CORP",
+    "categoria": "Oficina"
+  }
+]
