@@ -12,15 +12,13 @@
 
 <body>
     <div class="dashboard-container">
+        <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <i class='bx bx-bank'></i>
                     <span>Bank D&G</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class='bx bx-menu'></i>
-                </button>
             </div>
 
             <div class="user-info">
@@ -68,11 +66,17 @@
             </div>
         </nav>
 
+        <!-- Main Content -->
         <main class="main-content">
             <header class="top-bar">
-                <div class="page-title">
-                    <h1 id="pageTitle">Resumen</h1>
-                    <p id="pageSubtitle">Bienvenido a tu dashboard financiero</p>
+                <div class="mobile-header">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class='bx bx-menu'></i>
+                    </button>
+                    <div class="page-title">
+                        <h1 id="pageTitle">Resumen</h1>
+                        <p id="pageSubtitle">Bienvenido a tu dashboard financiero</p>
+                    </div>
                 </div>
                 <div class="top-bar-actions">
                     <button class="notification-btn">
@@ -82,7 +86,9 @@
                 </div>
             </header>
 
+            <!-- Content Sections -->
             <div class="content-wrapper">
+                <!-- Overview Section -->
                 <section id="overview-section" class="content-section active">
                     <div class="overview-grid">
                         <!-- Featured Account Card -->
@@ -105,6 +111,7 @@
                             </div>
                         </div>
 
+                        <!-- Quick Stats -->
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="stat-icon">
@@ -137,20 +144,25 @@
                             </div>
                         </div>
 
+                        <!-- Accounts Summary -->
                         <div class="accounts-summary">
                             <h3>Mis Cuentas</h3>
                             <div class="accounts-list" id="accountsList">
+                                <!-- Accounts will be loaded here -->
                             </div>
                         </div>
 
+                        <!-- Recent Transactions -->
                         <div class="recent-transactions">
                             <h3>Movimientos Recientes</h3>
                             <div class="transactions-list" id="recentTransactions">
+                                <!-- Recent transactions will be loaded here -->
                             </div>
                         </div>
                     </div>
                 </section>
 
+                <!-- Accounts Section -->
                 <section id="accounts-section" class="content-section">
                     <div class="section-header">
                         <h2>Gestión de Cuentas</h2>
@@ -161,9 +173,11 @@
                     </div>
 
                     <div class="accounts-grid" id="accountsGrid">
+                        <!-- Accounts will be loaded here -->
                     </div>
                 </section>
 
+                <!-- Cards Section -->
                 <section id="cards-section" class="content-section">
                     <div class="section-header">
                         <h2>Mis Tarjetas</h2>
@@ -174,9 +188,11 @@
                     </div>
 
                     <div class="cards-grid" id="cardsGrid">
+                        <!-- Cards will be loaded here -->
                     </div>
                 </section>
 
+                <!-- Transfers Section -->
                 <section id="transfers-section" class="content-section">
                     <div class="section-header">
                         <h2>Transferencias</h2>
@@ -204,6 +220,7 @@
         </main>
     </div>
 
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">
             <i class='bx bx-loader-alt'></i>

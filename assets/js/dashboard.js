@@ -4,6 +4,7 @@ let currentUser = null;
 let accounts = [];
 let transactions = [];
 
+// ----------- Data Loading -----------
 async function loadAccounts() {
     try {
         const response = await fetch('../assets/data/accounts.json');
@@ -28,6 +29,8 @@ async function loadTransactions() {
 
 // ----------- User Management -----------
 async function getCurrentUser() {
+    // En una app real, esto vendría de localStorage o session
+    // Por ahora usamos el usuario por defecto
     return await getUserByName('user');
 }
 
@@ -38,22 +41,27 @@ async function init() {
     try {
         currentUser = await getCurrentUser();
         if (!currentUser) {
+            // Si no hay usuario, redirigir al login
             window.location.href = 'authentication.html';
             return;
         }
 
+        // Cargar datos
         const [allAccounts, allTransactions] = await Promise.all([
             loadAccounts(),
             loadTransactions()
         ]);
 
+        // Filtrar cuentas del usuario actual
         accounts = allAccounts.filter(account => account.propietario === currentUser.username);
         transactions = allTransactions;
 
+        // Configurar UI
         setupUI();
         setupNavigation();
         setupEventListeners();
         
+        // Cargar datos iniciales
         updateUserInfo();
         loadOverviewData();
         
@@ -65,6 +73,7 @@ async function init() {
     }
 }
 
+// ----------- UI Setup -----------
 function setupUI() {
     const userName = document.getElementById('userName');
     if (userName && currentUser) {
@@ -74,24 +83,34 @@ function setupUI() {
 
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
+    const sidebar = document.querySelector('.sidebar');
     
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             
+            // Remover clase active de todos los items
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
+            // Agregar clase active al item clickeado
             link.parentElement.classList.add('active');
             
+            // Cambiar sección
             const section = link.dataset.section;
             showSection(section);
+            
+            // Cerrar sidebar en móvil después de seleccionar una opción
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+            }
         });
     });
 }
 
 function setupEventListeners() {
+    // Sidebar toggle para mobile
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -101,6 +120,16 @@ function setupEventListeners() {
         });
     }
 
+    // Cerrar sidebar al hacer clic fuera de él en móvil
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
+
+    // Logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -110,6 +139,7 @@ function setupEventListeners() {
         });
     }
 
+    // Transfer cards
     const ownTransfer = document.getElementById('ownTransfer');
     const thirdPartyTransfer = document.getElementById('thirdPartyTransfer');
     
@@ -126,18 +156,23 @@ function setupEventListeners() {
     }
 }
 
+// ----------- Section Management -----------
 function showSection(sectionName) {
+    // Ocultar todas las secciones
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
     
+    // Mostrar la sección seleccionada
     const targetSection = document.getElementById(`${sectionName}-section`);
     if (targetSection) {
         targetSection.classList.add('active');
     }
     
+    // Actualizar título
     updatePageTitle(sectionName);
     
+    // Cargar datos específicos de la sección
     switch (sectionName) {
         case 'overview':
             loadOverviewData();
@@ -149,6 +184,7 @@ function showSection(sectionName) {
             loadCardsData();
             break;
         case 'transfers':
+            // No hay datos específicos que cargar
             break;
     }
 }
@@ -173,6 +209,7 @@ function updatePageTitle(section) {
     }
 }
 
+// ----------- Data Loading Functions -----------
 function updateUserInfo() {
     if (!currentUser) return;
     
@@ -192,6 +229,7 @@ function loadOverviewData() {
 function loadFeaturedAccount() {
     if (accounts.length === 0) return;
     
+    // Usar la cuenta con mayor saldo como cuenta principal
     const featuredAccount = accounts.reduce((prev, current) => 
         current.saldo > prev.saldo ? current : prev
     );
@@ -221,6 +259,7 @@ function loadRecentTransactions() {
     const recentTransactions = document.getElementById('recentTransactions');
     if (!recentTransactions) return;
     
+    // Obtener las últimas 5 transacciones
     const userAccountIds = accounts.map(acc => acc.account_id);
     const userTransactions = transactions
         .filter(tx => userAccountIds.includes(tx.account_id))
@@ -258,6 +297,7 @@ function loadAccountsData() {
 }
 
 function loadCardsData() {
+    // Placeholder para tarjetas - se implementará en el módulo de tarjetas
     const cardsGrid = document.getElementById('cardsGrid');
     if (!cardsGrid) return;
     
