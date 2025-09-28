@@ -1,0 +1,174 @@
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg-light);
+  margin: 0;
+  padding: 2em;
+}
+
+/* Layout de dos columnas */
+.transfer-layout {
+  display: flex;
+  gap: 2em;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.transfer-container,
+.comprobante {
+  flex: 1;
+  max-width: 500px;
+  background: var(--color-bg-light);
+  padding: 2em;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+}
+
+h1 {
+  margin-bottom: 1em;
+  color: var(--color-primary);
+}
+
+h2 {
+  margin-bottom: 0.5em;
+  color: var(--color-primary);
+}
+
+.transfer-type {
+  display: flex;
+  gap: 1em;
+  margin-bottom: 1.5em;
+}
+
+.transfer-type label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6em 1em;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: var(--color-text-dark);
+  user-select: none;
+  border: 2px solid transparent; /* sin borde visible por defecto */
+  background: var(--color-bg-light);
+}
+
+/* Ocultar radio original */
+.transfer-type input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Cuando está seleccionado */
+.transfer-type input[type="radio"]:checked + span {
+  background: var(--color-primary);
+  color: var(--color-bg-light);
+  padding: 0.6em 1em;
+  border-radius: var(--border-radius);
+}
+
+/* Hover */
+.transfer-type label:hover span {
+  background: var(--color-primary);
+  color: var(--color-bg-light);
+}
+
+/* Span para el texto */
+.transfer-type label span {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  pointer-events: none; /* click pasa al label */
+  border-radius: var(--border-radius);
+  transition: background 0.3s, color 0.3s;
+}
+
+label {
+  display: block;
+  margin-top: 1em;
+  color: var(--color-text-dark);
+  font-weight: 600;
+}
+
+/* Normalizar altura y estilo de inputs y selects */
+input, select {
+  width: 100%;
+  padding: 0.8em;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-secondary);
+  margin-top: 0.3em;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Opcional: agregar ícono de flecha a los selects */
+select {
+  background: var(--color-bg-light) url("data:image/svg+xml;utf8,<svg fill='%239792c7' height='24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") no-repeat right 0.8em center;
+  background-size: 1em;
+  padding-right: 2em;
+}
+
+button {
+  margin-top: 1.5em;
+  padding: 0.8em;
+  width: 100%;
+  background: var(--color-primary);
+  color: var(--color-bg-light);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:disabled {
+  background: var(--color-secondary);
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.hidden { display: none; }
+
+.modal-content {
+  background: var(--color-bg-light);
+  padding: 2em;
+  border-radius: var(--border-radius);
+  width: 400px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+}
+
+.modal-actions button {
+  width: 48%;
+  border-radius: var(--border-radius);
+}
+
+/* Comprobante */
+.comprobante-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+}
+
+.comprobante-actions button {
+  width: 48%;
+  border-radius: var(--border-radius);
+}

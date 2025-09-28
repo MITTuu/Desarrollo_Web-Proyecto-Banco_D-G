@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Transferencias para Bank D&G">
+    <title>Bank D&G - Login</title>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/transactions.css">
+</head>
+
+<body>
+    <main class="transfer-layout">
+        <!-- Columna izquierda: Transferencias -->
+        <section class="transfer-container">
+            <h1>Transferencias</h1>
+
+            <!-- Selector de tipo de transferencia -->
+            <div class="transfer-type">
+                <label>
+                    <input type="radio" name="tipo" value="propias" checked>
+                    <span>Entre cuentas propias</span>
+                </label>
+                <label>
+                    <input type="radio" name="tipo" value="terceros">
+                    <span>A terceros (mismo banco)</span>
+                </label>
+            </div>
+
+            <!-- Formulario -->
+            <form id="transferForm">
+                <label for="origen">Cuenta origen</label>
+                <select id="origen" required>
+                    <option value="">Seleccione</option>
+                    <option value="123-001">123-001 (CRC)</option>
+                    <option value="123-002">123-002 (USD)</option>
+                </select>
+
+                <div id="destinoContainer">
+                    <label for="destino">Cuenta destino</label>
+                    <select id="destino" required>
+                        <option value="">Seleccione</option>
+                        <option value="123-002">123-002 (USD)</option>
+                    </select>
+                </div>
+
+                <label for="moneda">Moneda</label>
+                <select id="moneda" required>
+                    <option value="CRC">CRC</option>
+                    <option value="USD">USD</option>
+                </select>
+
+                <label for="monto">Monto</label>
+                <input type="number" id="monto" step="0.01" min="0.01" required>
+
+                <label for="descripcion">Descripción (opcional)</label>
+                <input type="text" id="descripcion" maxlength="255">
+
+                <button type="submit" id="continuarBtn" disabled>Continuar</button>
+            </form>
+        </section>
+
+        <!-- Columna derecha: Comprobante -->
+        <aside id="comprobante" class="comprobante hidden">
+            <h2>Comprobante de Transferencia</h2>
+            <div id="detalleComprobante"></div>
+            <div class="comprobante-actions">
+                <button id="descargarBtn">Descargar</button>
+                <button id="compartirBtn">Compartir</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Modal de confirmación -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Confirmar Transferencia</h2>
+            <div id="resumen"></div>
+            <div class="modal-actions">
+                <button id="cancelarBtn">Cancelar</button>
+                <button id="confirmarBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/transactions.js"></script>
+</body>
+
+</html>
