@@ -1,0 +1,46 @@
+[
+  {
+    "account_id": "CR01-0001-0001-123456789012",
+    "alias": "Cuenta Principal",
+    "tipo": "Corriente",
+    "moneda": "CRC",
+    "saldo": 1523400.50,
+    "propietario": "user",
+    "numero_mascara": "•••• •••• •••• 9012",
+    "estado": "activa",
+    "fecha_apertura": "2023-01-15T00:00:00Z"
+  },
+  {
+    "account_id": "CR01-0001-0001-987654321098",
+    "alias": "Ahorros Personal",
+    "tipo": "Ahorro",
+    "moneda": "CRC",
+    "saldo": 850000.25,
+    "propietario": "user",
+    "numero_mascara": "•••• •••• •••• 1098",
+    "estado": "activa",
+    "fecha_apertura": "2023-02-20T00:00:00Z"
+  },
+  {
+    "account_id": "CR01-0001-0001-555666777888",
+    "alias": "Cuenta USD",
+    "tipo": "Corriente",
+    "moneda": "USD",
+    "saldo": 2450.75,
+    "propietario": "user",
+    "numero_mascara": "•••• •••• •••• 7888",
+    "estado": "activa",
+    "fecha_apertura": "2023-03-10T00:00:00Z"
+  },
+  {
+    "account_id": "CR01-0001-0002-111222333444",
+    "alias": "Cuenta Admin",
+    "tipo": "Corriente",
+    "moneda": "CRC",
+    "saldo": 5000000.00,
+    "propietario": "admin",
+    "numero_mascara": "•••• •••• •••• 3444",
+    "estado": "activa",
+    "fecha_apertura": "2022-12-01T00:00:00Z"
+  }
+]

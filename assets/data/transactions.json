@@ -1,0 +1,102 @@
+[
+  {
+    "id": "TXN-2024-092701-001",
+    "account_id": "CR01-0001-0001-123456789012",
+    "fecha": "2024-09-27T08:30:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Pago servicios públicos",
+    "moneda": "CRC",
+    "monto": 45000.00,
+    "saldo_posterior": 1523400.50
+  },
+  {
+    "id": "TXN-2024-092702-002",
+    "account_id": "CR01-0001-0001-123456789012",
+    "fecha": "2024-09-26T14:15:00Z",
+    "tipo": "CREDITO",
+    "descripcion": "Depósito nómina",
+    "moneda": "CRC",
+    "monto": 750000.00,
+    "saldo_posterior": 1568400.50
+  },
+  {
+    "id": "TXN-2024-092603-003",
+    "account_id": "CR01-0001-0001-123456789012",
+    "fecha": "2024-09-25T16:22:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Compra supermercado",
+    "moneda": "CRC",
+    "monto": 38500.00,
+    "saldo_posterior": 818400.50
+  },
+  {
+    "id": "TXN-2024-092504-004",
+    "account_id": "CR01-0001-0001-987654321098",
+    "fecha": "2024-09-24T10:30:00Z",
+    "tipo": "CREDITO",
+    "descripcion": "Transferencia desde corriente",
+    "moneda": "CRC",
+    "monto": 100000.00,
+    "saldo_posterior": 850000.25
+  },
+  {
+    "id": "TXN-2024-092505-005",
+    "account_id": "CR01-0001-0001-987654321098",
+    "fecha": "2024-09-23T09:15:00Z",
+    "tipo": "CREDITO",
+    "descripcion": "Intereses ganados",
+    "moneda": "CRC",
+    "monto": 5250.25,
+    "saldo_posterior": 750000.25
+  },
+  {
+    "id": "TXN-2024-092506-006",
+    "account_id": "CR01-0001-0001-555666777888",
+    "fecha": "2024-09-22T11:45:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Compra online Amazon",
+    "moneda": "USD",
+    "monto": 125.50,
+    "saldo_posterior": 2450.75
+  },
+  {
+    "id": "TXN-2024-092507-007",
+    "account_id": "CR01-0001-0001-555666777888",
+    "fecha": "2024-09-21T13:20:00Z",
+    "tipo": "CREDITO",
+    "descripcion": "Depósito en efectivo",
+    "moneda": "USD",
+    "monto": 500.00,
+    "saldo_posterior": 2576.25
+  },
+  {
+    "id": "TXN-2024-092508-008",
+    "account_id": "CR01-0001-0001-123456789012",
+    "fecha": "2024-09-20T15:45:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Pago tarjeta de crédito",
+    "moneda": "CRC",
+    "monto": 150000.00,
+    "saldo_posterior": 856900.50
+  },
+  {
+    "id": "TXN-2024-092509-009",
+    "account_id": "CR01-0001-0001-987654321098",
+    "fecha": "2024-09-19T12:30:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Retiro ATM",
+    "moneda": "CRC",
+    "monto": 50000.00,
+    "saldo_posterior": 744750.00
+  },
+  {
+    "id": "TXN-2024-092510-010",
+    "account_id": "CR01-0001-0001-555666777888",
+    "fecha": "2024-09-18T14:10:00Z",
+    "tipo": "DEBITO",
+    "descripcion": "Transferencia internacional",
+    "moneda": "USD",
+    "monto": 300.00,
+    "saldo_posterior": 2076.25
+  }
+]
