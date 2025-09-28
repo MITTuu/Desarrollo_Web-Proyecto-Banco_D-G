@@ -4,12 +4,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login y Registro para Bank D&G">
-    <title>Bank D&G - Login</title>
+    <meta name="description" content="Dashboard - Bank D&G">
+    <title>Bank D&G - Dashboard</title>
     <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 
 <body>
-    <h1>Dashboard</h1>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class='bx bx-bank'></i>
+                    <span>Bank D&G</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class='bx bx-menu'></i>
+                </button>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class='bx bx-user'></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-role">Cliente</span>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="#" class="nav-link" data-section="overview">
+                        <i class='bx bx-home-alt'></i>
+                        <span>Resumen</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="accounts">
+                        <i class='bx bx-wallet'></i>
+                        <span>Cuentas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="cards">
+                        <i class='bx bx-credit-card'></i>
+                        <span>Tarjetas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="transfers">
+                        <i class='bx bx-transfer'></i>
+                        <span>Transferencias</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class='bx bx-log-out'></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title">
+                    <h1 id="pageTitle">Resumen</h1>
+                    <p id="pageSubtitle">Bienvenido a tu dashboard financiero</p>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="notification-btn">
+                        <i class='bx bx-bell'></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="overview-section" class="content-section active">
+                    <div class="overview-grid">
+                        <!-- Featured Account Card -->
+                        <div class="featured-card">
+                            <div class="card-header">
+                                <div class="card-type">Cuenta Principal</div>
+                                <div class="card-brand">Bank D&G</div>
+                            </div>
+                            <div class="card-content">
+                                <div class="account-number" id="featuredAccountNumber">
+                                    •••• •••• •••• 1234
+                                </div>
+                                <div class="card-details">
+                                    <div class="balance">
+                                        <span class="currency">₡</span>
+                                        <span class="amount" id="featuredBalance">1,523,400.50</span>
+                                    </div>
+                                    <div class="account-holder" id="featuredHolder">Roberto García</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class='bx bx-wallet'></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="totalAccounts">3</div>
+                                    <div class="stat-label">Cuentas Activas</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class='bx bx-credit-card'></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="totalCards">2</div>
+                                    <div class="stat-label">Tarjetas</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class='bx bx-trending-up'></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="monthlyIncome">+15.2%</div>
+                                    <div class="stat-label">Este Mes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accounts-summary">
+                            <h3>Mis Cuentas</h3>
+                            <div class="accounts-list" id="accountsList">
+                            </div>
+                        </div>
+
+                        <div class="recent-transactions">
+                            <h3>Movimientos Recientes</h3>
+                            <div class="transactions-list" id="recentTransactions">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="accounts-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Gestión de Cuentas</h2>
+                        <button class="btn-primary">
+                            <i class='bx bx-plus'></i>
+                            Nueva Cuenta
+                        </button>
+                    </div>
+
+                    <div class="accounts-grid" id="accountsGrid">
+                    </div>
+                </section>
+
+                <section id="cards-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Mis Tarjetas</h2>
+                        <button class="btn-primary">
+                            <i class='bx bx-plus'></i>
+                            Solicitar Tarjeta
+                        </button>
+                    </div>
+
+                    <div class="cards-grid" id="cardsGrid">
+                    </div>
+                </section>
+
+                <section id="transfers-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Transferencias</h2>
+                    </div>
+
+                    <div class="transfers-options">
+                        <div class="transfer-card" id="ownTransfer">
+                            <div class="transfer-icon">
+                                <i class='bx bx-transfer'></i>
+                            </div>
+                            <h3>Entre mis cuentas</h3>
+                            <p>Transfiere entre tus cuentas propias</p>
+                        </div>
+
+                        <div class="transfer-card" id="thirdPartyTransfer">
+                            <div class="transfer-icon">
+                                <i class='bx bx-send'></i>
+                            </div>
+                            <h3>A terceros</h3>
+                            <p>Envía dinero a otras personas</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class='bx bx-loader-alt'></i>
+            <p>Cargando datos...</p>
+        </div>
+    </div>
+
+    <script type="module" src="../assets/js/dashboard.js"></script>
 </body>
+
 </html>
