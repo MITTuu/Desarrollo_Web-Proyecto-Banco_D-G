@@ -363,7 +363,8 @@
     padding: 2rem;
 }
 
-/* -------- Responsive -------- *//* -------- Base Styles -------- */
+/* -------- Responsive -------- */
+/* -------- Base Styles -------- */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -591,7 +592,7 @@ body {
 
 .notification-btn {
     position: relative;
-    background: var(--background-white);
+    background: var(--primary-color);
     border: 1px solid var(--border-light);
     border-radius: 50%;
     width: 48px;
@@ -960,8 +961,13 @@ body {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* -------- Account Cards -------- */
@@ -1044,7 +1050,7 @@ body {
     .overview-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -1053,15 +1059,20 @@ body {
 @media (max-width: 768px) {
     .sidebar {
         width: 280px;
-        transform: translateX(-100%);
+        transform: translateX(-280px);
+        /* mover exactamente su ancho */
         position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
         z-index: 1001;
+        transition: var(--transition);
     }
-    
+
     .sidebar.open {
         transform: translateX(0);
     }
-    
+
     /* Overlay para cerrar sidebar */
     .sidebar.open::after {
         content: '';
@@ -1073,45 +1084,45 @@ body {
         background: rgba(0, 0, 0, 0.5);
         z-index: -1;
     }
-    
+
     .main-content {
         margin-left: 0;
         padding: 1rem;
         width: 100%;
     }
-    
+
     .sidebar-toggle {
         display: block;
     }
-    
+
     .top-bar {
         flex-direction: row;
         align-items: center;
         gap: 1rem;
     }
-    
+
     .mobile-header {
         flex-direction: row;
         align-items: center;
     }
-    
+
     .page-title h1 {
         font-size: 1.25rem;
         margin-bottom: 0;
     }
-    
+
     .page-title p {
         font-size: 0.875rem;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .featured-card {
         padding: 1.5rem;
     }
-    
+
     .amount {
         font-size: 1.5rem;
     }
@@ -1121,18 +1132,18 @@ body {
     .dashboard-container {
         flex-direction: column;
     }
-    
+
     .sidebar {
         position: fixed;
         z-index: 1001;
         height: 100vh;
         width: 280px;
     }
-    
+
     .transfers-options {
         grid-template-columns: 1fr;
     }
-    
+
     .card-details {
         flex-direction: column;
         align-items: flex-start;
