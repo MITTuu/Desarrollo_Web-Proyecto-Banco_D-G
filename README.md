@@ -57,27 +57,28 @@ Prototipo visual interactivo que simula los flujos esenciales de una aplicación
 Desarrollo_Web-Proyecto-Banco_D-G/
 ├── index.html
 ├── pages/
-│ ├── dashboard.html
-│ ├── account-detail.html
-│ └── card-detail.html
+│   ├── dashboard.html
+│   ├── account-detail.html
+│   └── card-detail.html
 ├── assets/
-│ ├── css/
-│ │ ├── authentication.css
-│ │ ├── dashboard.css
-│ │ ├── accounts.css
-│ │ └── cards.css
-│ ├── js/
-│ │ ├── authentication.js
-│ │ ├── dashboard.js
-│ │ ├── accounts.js
-│ │ ├── cards.js
-│ │ └── get-data.js
-│ ├── data/
-│ │ ├── users.json
-│ │ ├── accounts.json
-│ │ ├── transactions.json
-│ │ ├── cards.json
-│ │ └── card-transactions.json
-│ └── docs/
-│ └── terminos.pdf
+│   ├── css/
+│   │   ├── authentication.css
+│   │   ├── dashboard.css
+│   │   ├── accounts.css
+│   │   └── cards.css
+│   ├── js/
+│   │   ├── authentication.js
+│   │   ├── dashboard.js
+│   │   ├── accounts.js
+│   │   ├── cards.js
+│   │   └── get-data.js
+│   ├── data/
+│   │   ├── users.json
+│   │   ├── accounts.json
+│   │   ├── transactions.json
+│   │   ├── cards.json
+│   │   └── card-transactions.json
+│   └── docs/
+│       └── terminos.pdf
 └── README.md
+
