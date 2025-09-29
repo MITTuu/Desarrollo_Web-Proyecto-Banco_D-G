@@ -54,6 +54,7 @@ Prototipo visual interactivo que simula los flujos esenciales de una aplicación
 ---
 
 ## 📁 Estructura del Proyecto
+```
 Desarrollo_Web-Proyecto-Banco_D-G/
 ├── index.html
 ├── pages/
@@ -81,4 +82,5 @@ Desarrollo_Web-Proyecto-Banco_D-G/
 │   └── docs/
 │       └── terminos.pdf
 └── README.md
+```
 
