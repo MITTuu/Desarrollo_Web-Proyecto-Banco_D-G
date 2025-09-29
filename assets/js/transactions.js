@@ -78,7 +78,6 @@ fromAccountSelect.addEventListener('change', () => {
     updateAccountDetail(fromAccountSelect.value);
 });
 
-// Inicializar detalle al mostrar formulario
 function showForm(isOwn) {
     isOwnTransfer = isOwn;
     document.querySelector('.transfers-options').style.display = 'none';
@@ -86,7 +85,7 @@ function showForm(isOwn) {
     backBtn.style.display = 'block';
 
     populateFromAccount();
-    updateAccountDetail(fromAccountSelect.value); // <- actualizar detalle al cargar formulario
+    updateAccountDetail(fromAccountSelect.value); 
 
     if (isOwn) {
         populateToAccountSelect(fromAccountSelect.value);
@@ -119,7 +118,6 @@ function updateAccountDetail(accountId) {
 }
 
 
-// Botón volver
 backBtn.addEventListener('click', () => {
     resetSelection();
     clearForm();
@@ -127,21 +125,17 @@ backBtn.addEventListener('click', () => {
 });
 
 
-// ----------- Eventos selección ----------
 ownTransferCard.addEventListener('click', () => { resetSelection(); ownTransferCard.classList.add('active'); showForm(true); });
 thirdPartyCard.addEventListener('click', () => { resetSelection(); thirdPartyCard.classList.add('active'); showForm(false); });
 
-// ----------- Botón volver ----------
 backBtn.addEventListener('click', () => { resetSelection(); clearForm(); });
 
-// ----------- Clear form ----------
 function clearForm() {
     toAccountInput.value = '';
     amountInput.value = '';
     conceptInput.value = '';
 }
 
-// ----------- Modal ----------
 function showModal(message, confirm = false, onConfirm = null) {
     modalMessage.innerHTML = message;
     modal.classList.remove('hidden');
@@ -151,7 +145,6 @@ function showModal(message, confirm = false, onConfirm = null) {
 
 modalClose.addEventListener('click', () => { modal.classList.add('hidden'); });
 
-// ----------- Validación ----------
 function validateTransfer() {
     const fromAcc = accounts.find(a => a.account_id === fromAccountSelect.value);
     const amount = parseFloat(amountInput.value);
@@ -175,14 +168,12 @@ function validateTransfer() {
     }
 }
 
-// ----------- Continuar transferencia (mostrar resumen) ----------
 submitBtn.addEventListener('click', () => {
     const data = validateTransfer();
     if (!data) return;
 
     const { fromAcc, toAcc, amount, description } = data;
 
-    // Mostrar modal de confirmación
     const summary = `
         <p><strong>De:</strong> ${fromAcc.alias} (${fromAcc.numero_mascara})</p>
         <p><strong>Para:</strong> ${toAcc.alias} (${toAcc.numero_mascara})</p>
@@ -192,7 +183,6 @@ submitBtn.addEventListener('click', () => {
     `;
     showModal(summary, true, () => {
         modal.classList.add('hidden');
-        // mostrar comprobante debajo del formulario
         receiptFrom.textContent = `${fromAcc.alias} (${fromAcc.numero_mascara})`;
         receiptTo.textContent = `${toAcc.alias} (${toAcc.numero_mascara})`;
         receiptAmount.textContent = `₡ ${amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
@@ -204,7 +194,6 @@ submitBtn.addEventListener('click', () => {
 });
 
 
-// ----------- Mostrar recibo ----------
 function showReceipt({fromAcc,toAcc,amount,description}) {
     receiptFrom.textContent = `${fromAcc.alias} (${fromAcc.numero_mascara})`;
     receiptTo.textContent = `${toAcc.alias} (${toAcc.numero_mascara})`;
@@ -214,11 +203,9 @@ function showReceipt({fromAcc,toAcc,amount,description}) {
     receiptDiv.style.display = 'block';
 }
 
-// ----------- Descargar / Compartir (simplificado) ----------
 document.getElementById('downloadBtn').addEventListener('click',()=>{ alert('Descarga PDF (simulada)'); });
 document.getElementById('shareBtn').addEventListener('click',()=>{ alert('Compartir comprobante (simulado)'); });
 
-// ----------- Actualizar destino cuando cambia origen (solo cuentas propias) ----------
 fromAccountSelect.addEventListener('change', ()=>{
     if(isOwnTransfer) populateToAccountSelect(fromAccountSelect.value);
 });

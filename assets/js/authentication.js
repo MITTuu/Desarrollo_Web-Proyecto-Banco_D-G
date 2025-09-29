@@ -104,7 +104,7 @@ loginForm.addEventListener('submit', async e => {
     const user = await getUserByName(username);
 
     if (user && user.password === password) {
-      window.location.href = "dashboard.html";
+      window.location.href = "/pages/dashboard.html";
     } else {
       loginError.textContent = 'Usuario o contraseña incorrectos';
     }
@@ -235,7 +235,6 @@ openRecover.addEventListener("click", e => { e.preventDefault(); recoverModal.st
 closeRecover.addEventListener("click", closeRecoverModal);
 recoverModal.addEventListener("click", e => { if(e.target===recoverModal) closeRecoverModal(); });
 
-// Campos de recuperación
 const recoverFields = [
   { el: document.getElementById("recover-identifier"), validator: v => !!v.trim(), message: "Ingrese su usuario o correo" },
   { el: document.getElementById("recover-code"), validator: v => v.trim() === "123456", message: "Código inválido" },
@@ -247,7 +246,6 @@ setupFieldValidation(recoverFields);
 setupTogglePassword("new-password", "toggleNewPassword");
 setupTogglePassword("confirm-new-password", "toggleConfirmNewPassword");
 
-// Paso 1
 document.getElementById("sendCodeBtn").addEventListener("click", () => {
   const input = document.getElementById("recover-identifier");
   const error = input.nextElementSibling;
@@ -256,7 +254,6 @@ document.getElementById("sendCodeBtn").addEventListener("click", () => {
   showLoading(loadingRecover,1500,()=>goToStep(2));
 });
 
-// Paso 2
 document.getElementById("verifyCodeBtn").addEventListener("click", () => {
   const input = document.getElementById("recover-code");
   const error = input.nextElementSibling;
@@ -266,7 +263,6 @@ document.getElementById("verifyCodeBtn").addEventListener("click", () => {
 });
 document.getElementById("resendCodeBtn").addEventListener("click", ()=>alert("Se ha reenviado el código de verificación."));
 
-// Paso 3
 document.getElementById("changePasswordBtn").addEventListener("click", () => {
   const newPass = document.getElementById("new-password");
   const confirmPass = document.getElementById("confirm-new-password");
@@ -277,5 +273,4 @@ document.getElementById("changePasswordBtn").addEventListener("click", () => {
   showLoading(loadingRecover,1500,()=>goToStep(4));
 });
 
-// Paso 4
 document.getElementById("goToLoginBtn").addEventListener("click", () => { closeRecoverModal(); container.classList.remove('active'); });

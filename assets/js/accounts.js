@@ -45,7 +45,7 @@ async function init() {
     try {
         currentUser = await getCurrentUser();
         if (!currentUser) {
-            window.location.href = 'authentication.html';
+           window.location.href = window.location.origin + '/index.html';
             return;
         }
 
@@ -55,13 +55,11 @@ async function init() {
             return;
         }
 
-        // Cargar datos
         const [accounts, transactions] = await Promise.all([
             loadAccounts(),
             loadTransactionsAPI()
         ]);
 
-        // Encontrar la cuenta específica
         currentAccount = accounts.find(acc => 
             acc.account_id === accountId && acc.propietario === currentUser.username
         );
@@ -71,15 +69,12 @@ async function init() {
             return;
         }
 
-        // Filtrar transacciones de esta cuenta
         allTransactions = transactions.filter(tx => tx.account_id === accountId);
         filteredTransactions = [...allTransactions];
 
-        // Configurar UI
         setupUI();
         setupEventListeners();
         
-        // Cargar datos
         updateAccountInfo();
         await loadTransactionsData(); 
         
@@ -98,7 +93,6 @@ function setupUI() {
 }
 
 function setupEventListeners() {
-    // Sidebar toggle para mobile
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -108,33 +102,26 @@ function setupEventListeners() {
         });
     }
 
-    // Navegación del sidebar
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
             
-            // Si tiene href específico, no prevenir default
             if (href && href !== '#') {
-                // Cerrar sidebar en móvil
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('open');
                 }
-                return; // Permitir navegación normal
+                return; 
             }
             
-            // Para links sin href específico
             e.preventDefault();
             
-            // Obtener el texto del span para determinar la sección
             const sectionText = link.querySelector('span').textContent;
             
-            // Cerrar sidebar en móvil
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('open');
             }
             
-            // Navegar según la sección
             switch(sectionText) {
                 case 'Resumen':
                     window.location.href = 'dashboard.html';
@@ -152,7 +139,6 @@ function setupEventListeners() {
         });
     });
 
-    // Cerrar sidebar al hacer clic fuera
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
             if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
@@ -161,17 +147,15 @@ function setupEventListeners() {
         }
     });
 
-    // Logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                window.location.href = 'authentication.html';
+                window.location.href = window.location.origin + '/index.html';
             }
         });
     }
 
-    // Transfer button
     const transferBtn = document.getElementById('transferBtn');
     if (transferBtn) {
         transferBtn.addEventListener('click', () => {
@@ -179,13 +163,11 @@ function setupEventListeners() {
         });
     }
 
-    // Search
     const searchInput = document.getElementById('searchTransactions');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(handleSearch, 300));
     }
 
-    // Filters
     const typeFilter = document.getElementById('typeFilter');
     const dateFilter = document.getElementById('dateFilter');
     
@@ -197,7 +179,6 @@ function setupEventListeners() {
         dateFilter.addEventListener('change', handleFilters);
     }
 
-    // Pagination
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     
@@ -214,23 +195,19 @@ function setupEventListeners() {
 function updateAccountInfo() {
     if (!currentAccount) return;
 
-    // Update page title and breadcrumb
     document.getElementById('accountAlias').textContent = currentAccount.alias;
     document.getElementById('accountAliasDetail').textContent = currentAccount.alias;
     
-    // Update account details
     document.getElementById('accountNumber').textContent = currentAccount.account_id;
     document.getElementById('accountType').textContent = currentAccount.tipo;
     document.getElementById('accountCurrency').textContent = currentAccount.moneda;
     document.getElementById('accountBalance').textContent = formatCurrency(currentAccount.saldo, currentAccount.moneda);
     
-    // Update icon based on account type
     const icon = document.getElementById('accountIcon');
     if (icon) {
         icon.className = currentAccount.tipo === 'Ahorro' ? 'bx bx-piggy-bank' : 'bx bx-wallet';
     }
     
-    // Update last update time
     document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('es-CR');
 }
 
@@ -249,20 +226,16 @@ function applyFilters() {
     const dateFilter = document.getElementById('dateFilter').value;
 
     filteredTransactions = allTransactions.filter(transaction => {
-        // Search filter
         const matchesSearch = !searchTerm || 
             transaction.descripcion.toLowerCase().includes(searchTerm);
 
-        // Type filter
         const matchesType = !typeFilter || transaction.tipo === typeFilter;
 
-        // Date filter
         const matchesDate = filterByDate(transaction, dateFilter);
 
         return matchesSearch && matchesType && matchesDate;
     });
 
-    // Reset to first page
     currentPage = 1;
     loadTransactions();
 }
@@ -274,7 +247,6 @@ function filterByDate(transaction, dateFilter) {
     const transactionDate = new Date(transaction.fecha);
     const now = new Date();
     
-    // Normalizar fechas para comparación (solo año, mes, día)
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const txDate = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
 
@@ -301,7 +273,6 @@ function filterByDate(transaction, dateFilter) {
 async function loadTransactionsData() {
     showLoadingState();
 
-    // Reducir el delay a algo más razonable (200ms)
     setTimeout(() => {
         if (filteredTransactions.length === 0) {
             showEmptyState();
@@ -316,7 +287,6 @@ async function loadTransactionsData() {
 function loadTransactions() {
     showLoadingState();
 
-    // Delay más corto para los filtros
     setTimeout(() => {
         if (filteredTransactions.length === 0) {
             showEmptyState();

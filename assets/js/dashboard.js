@@ -53,8 +53,6 @@ async function loadCardTransactions() {
 
 // ----------- User Management -----------
 async function getCurrentUser() {
-    // En una app real, esto vendría de localStorage o session
-    // Por ahora usamos el usuario por defecto
     return await getUserByName('user');
 }
 
@@ -65,12 +63,10 @@ async function init() {
     try {
         currentUser = await getCurrentUser();
         if (!currentUser) {
-            // Si no hay usuario, redirigir al login
-            window.location.href = 'authentication.html';
+           window.location.href = window.location.origin + '/index.html';
             return;
         }
 
-        // Cargar datos
         const [allAccounts, allTransactions, allCards, allCardTransactions] = await Promise.all([
             loadAccounts(),
             loadTransactions(),
@@ -78,22 +74,18 @@ async function init() {
             loadCardTransactions()
         ]);
 
-        // Filtrar datos del usuario actual
         accounts = allAccounts.filter(account => account.propietario === currentUser.username);
         transactions = allTransactions;
         cards = allCards.filter(card => card.propietario === currentUser.username);
         cardTransactions = allCardTransactions;
 
-        // Configurar UI
         setupUI();
         setupNavigation();
         setupEventListeners();
         
-        // Cargar datos iniciales
         updateUserInfo();
         loadOverviewData();
         
-        // Manejar navegación con hash
         handleHashNavigation();
         
     } catch (error) {
@@ -109,10 +101,8 @@ function handleHashNavigation() {
     const hash = window.location.hash.substring(1); // Remover el #
     
     if (hash) {
-        // Activar la sección correspondiente
         showSection(hash);
         
-        // Actualizar navegación activa
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
@@ -140,19 +130,15 @@ function setupNavigation() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Remover clase active de todos los items
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Agregar clase active al item clickeado
             link.parentElement.classList.add('active');
             
-            // Cambiar sección
             const section = link.dataset.section;
             showSection(section);
             
-            // Cerrar sidebar en móvil después de seleccionar una opción
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('open');
             }
@@ -161,7 +147,6 @@ function setupNavigation() {
 }
 
 function setupEventListeners() {
-    // Sidebar toggle para mobile
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -171,7 +156,6 @@ function setupEventListeners() {
         });
     }
 
-    // Cerrar sidebar al hacer clic fuera de él en móvil
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
             if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
@@ -180,12 +164,11 @@ function setupEventListeners() {
         }
     });
 
-    // Logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                window.location.href = 'authentication.html';
+                window.location.href = window.location.origin + '/index.html';
             }
         });
     }
@@ -211,12 +194,10 @@ function setupEventListeners() {
 
 // ----------- Section Management -----------
 function showSection(sectionName) {
-    // Ocultar todas las secciones
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
     
-    // Mostrar la sección seleccionada
     const targetSection = document.getElementById(`${sectionName}-section`);
     if (targetSection) {
         targetSection.classList.add('active');

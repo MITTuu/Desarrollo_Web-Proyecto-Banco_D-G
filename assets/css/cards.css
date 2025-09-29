@@ -1,6 +1,5 @@
 /* -------- Card Detail Styles -------- */
 
-/* Reutilizar estilos de accounts.css */
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -23,7 +22,6 @@
     font-size: 0.75rem;
 }
 
-/* -------- Card Header Section -------- */
 .card-header-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -154,7 +152,6 @@
     text-align: right;
 }
 
-/* -------- Card Info Summary -------- */
 .card-info-summary {
     background: var(--background-white);
     border-radius: var(--border-radius);
@@ -248,7 +245,6 @@
     margin-top: 0.5rem;
 }
 
-/* -------- Card Transaction Styles -------- */
 .card-transaction-row {
     display: flex;
     align-items: center;
@@ -352,7 +348,6 @@
     color: var(--text-secondary);
 }
 
-/* -------- Card Types Specific Colors -------- */
 .card-gold {
     background: linear-gradient(135deg, #FFD700, #FFA500);
     color: #333;
@@ -368,7 +363,6 @@
     color: #fff;
 }
 
-/* -------- Filters Section (inherited from accounts.css) -------- */
 .filters-section {
     background: var(--background-white);
     border-radius: var(--border-radius);
@@ -435,7 +429,6 @@
     background: white;
 }
 
-/* -------- States (inherited from accounts.css) -------- */
 .transactions-section {
     background: var(--background-white);
     border-radius: var(--border-radius);
@@ -503,7 +496,6 @@
     overflow-y: auto;
 }
 
-/* -------- Pagination (inherited) -------- */
 .pagination {
     padding: 1.5rem;
     border-top: 1px solid var(--border-light);
@@ -542,7 +534,6 @@
     color: var(--text-secondary);
 }
 
-/* -------- Responsive -------- */
 @media (max-width: 768px) {
     .card-header-section {
         grid-template-columns: 1fr;

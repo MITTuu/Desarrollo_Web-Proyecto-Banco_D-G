@@ -5,7 +5,6 @@ body {
     padding: 2em;
 }
 
-/* Layout de dos columnas */
 .transfer-layout {
     display: flex;
     gap: 2em;
@@ -62,7 +61,6 @@ label {
     font-weight: 600;
 }
 
-/* Normalizar altura y estilo de inputs y selects */
 input,
 select {
     width: 100%;
@@ -101,7 +99,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Modal */
 .modal {
     position: fixed;
     top: 0;
@@ -137,7 +134,6 @@ button:disabled {
     border-radius: var(--border-radius);
 }
 
-/* Comprobante */
 .comprobante-actions {
     display: flex;
     justify-content: space-between;
@@ -149,14 +145,13 @@ button:disabled {
     border-radius: var(--border-radius);
 }
 
-/* -------- Responsive -------- */
 @media screen and (max-width: 500px) {
 
 }
 
 @media screen and (max-width: 665px) {
     .modal-content {
-        max-width: 95%; /* que ocupe casi toda la pantalla */
+        max-width: 95%; 
         padding: 1.5em;
         z-index: 1001;
     }

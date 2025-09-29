@@ -45,7 +45,7 @@ async function init() {
     try {
         currentUser = await getCurrentUser();
         if (!currentUser) {
-            window.location.href = 'authentication.html';
+           window.location.href = window.location.origin + '/index.html';
             return;
         }
 
@@ -159,7 +159,7 @@ function setupEventListeners() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                window.location.href = 'authentication.html';
+                window.location.href = window.location.origin + '/index.html';
             }
         });
     }
@@ -397,12 +397,10 @@ function showTransactionsList() {
     const transactionsList = document.getElementById('transactionsList');
     transactionsList.style.display = 'block';
     
-    // Calculate pagination
     const startIndex = (currentPage - 1) * transactionsPerPage;
     const endIndex = startIndex + transactionsPerPage;
     const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
     
-    // Generate HTML
     transactionsList.innerHTML = pageTransactions.map(transaction => 
         createCardTransactionRow(transaction)
     ).join('');
