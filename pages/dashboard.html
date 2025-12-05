@@ -10,7 +10,16 @@
     <link rel="stylesheet" href="../assets/css/base.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/transactions.css">
+    <link rel="stylesheet" href="../assets/css/modals.css"> 
+
 </head>
+<style>
+.modal-actions {
+    display: flex !important;
+    position: relative !important;
+    visibility: visible !important;
+}
+</style>
 
 <body>
     <div class="dashboard-container">
@@ -28,7 +37,7 @@
                     <i class='bx bx-user'></i>
                 </div>
                 <div class="user-details">
-                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-name" id="userName">Cargando...</span>
                     <span class="user-role">Cliente</span>
                 </div>
             </div>
@@ -83,7 +92,7 @@
                 <div class="top-bar-actions">
                     <button class="notification-btn">
                         <i class='bx bx-bell'></i>
-                        <span class="notification-count">3</span>
+                        <span class="notification-count">0</span>
                     </button>
                 </div>
             </header>
@@ -101,14 +110,14 @@
                             </div>
                             <div class="card-content">
                                 <div class="account-number" id="featuredAccountNumber">
-                                    •••• •••• •••• 1234
+                                    •••• •••• •••• ••••
                                 </div>
                                 <div class="card-details">
                                     <div class="balance">
                                         <span class="currency">₡</span>
-                                        <span class="amount" id="featuredBalance">1,523,400.50</span>
+                                        <span class="amount" id="featuredBalance">0.00</span>
                                     </div>
-                                    <div class="account-holder" id="featuredHolder">Roberto García</div>
+                                    <div class="account-holder" id="featuredHolder">Usuario</div>
                                 </div>
                             </div>
                         </div>
@@ -120,7 +129,7 @@
                                     <i class='bx bx-wallet'></i>
                                 </div>
                                 <div class="stat-content">
-                                    <div class="stat-value" id="totalAccounts">3</div>
+                                    <div class="stat-value" id="totalAccounts">0</div>
                                     <div class="stat-label">Cuentas Activas</div>
                                 </div>
                             </div>
@@ -130,7 +139,7 @@
                                     <i class='bx bx-credit-card'></i>
                                 </div>
                                 <div class="stat-content">
-                                    <div class="stat-value" id="totalCards">2</div>
+                                    <div class="stat-value" id="totalCards">0</div>
                                     <div class="stat-label">Tarjetas</div>
                                 </div>
                             </div>
@@ -140,8 +149,8 @@
                                     <i class='bx bx-trending-up'></i>
                                 </div>
                                 <div class="stat-content">
-                                    <div class="stat-value" id="monthlyIncome">+15.2%</div>
-                                    <div class="stat-label">Este Mes</div>
+                                    <div class="stat-value" id="monthlyIncome">₡0.00</div>
+                                    <div class="stat-label">Balance Total</div>
                                 </div>
                             </div>
                         </div>
@@ -150,7 +159,7 @@
                         <div class="accounts-summary">
                             <h3>Mis Cuentas</h3>
                             <div class="accounts-list" id="accountsList">
-                                <!-- Accounts will be loaded here -->
+                                <p class="loading-text">Cargando cuentas...</p>
                             </div>
                         </div>
 
@@ -158,7 +167,7 @@
                         <div class="recent-transactions">
                             <h3>Movimientos Recientes</h3>
                             <div class="transactions-list" id="recentTransactions">
-                                <!-- Recent transactions will be loaded here -->
+                                <p class="loading-text">Cargando movimientos...</p>
                             </div>
                         </div>
                     </div>
@@ -168,14 +177,14 @@
                 <section id="accounts-section" class="content-section">
                     <div class="section-header">
                         <h2>Gestión de Cuentas</h2>
-                        <button class="btn-primary">
+                        <button class="btn-primary" id="btnCreateAccount">
                             <i class='bx bx-plus'></i>
                             Nueva Cuenta
                         </button>
                     </div>
 
                     <div class="accounts-grid" id="accountsGrid">
-                        <!-- Accounts will be loaded here -->
+                        <p class="loading-text">Cargando cuentas...</p>
                     </div>
                 </section>
 
@@ -183,14 +192,14 @@
                 <section id="cards-section" class="content-section">
                     <div class="section-header">
                         <h2>Mis Tarjetas</h2>
-                        <button class="btn-primary">
+                        <button class="btn-primary" id="btnCreateCard">
                             <i class='bx bx-plus'></i>
                             Solicitar Tarjeta
                         </button>
                     </div>
 
                     <div class="cards-grid" id="cardsGrid">
-                        <!-- Cards will be loaded here -->
+                        <p class="loading-text">Cargando tarjetas...</p>
                     </div>
                 </section>
 
@@ -216,42 +225,46 @@
                     <!-- Formulario de transferencia -->
                     <div class="transfer-form-container" style="display:none; margin-top:2rem;">
                         <label for="fromAccount">Cuenta origen</label>
-                        <select id="fromAccount"></select>
+                        <select id="fromAccount">
+                            <option value="">Seleccione una cuenta</option>
+                        </select>
 
                         <!-- Detalle de cuenta -->
                         <div id="accountDetail" style="margin:0.5rem 0; padding:0.5rem; background:#f5f5f5; border-radius:4px; display:none;">
-                            <p><strong>Saldo disponible:</strong> <span id="detailBalance"></span></p>
-                            <p><strong>Tipo:</strong> <span id="detailType"></span></p>
-                            <p><strong>Moneda:</strong> <span id="detailCurrency"></span></p>
+                            <p><strong>Saldo disponible:</strong> <span id="detailBalance">₡0.00</span></p>
+                            <p><strong>Tipo:</strong> <span id="detailType">-</span></p>
+                            <p><strong>Moneda:</strong> <span id="detailCurrency">-</span></p>
                         </div>
 
                         <label for="toAccount">Cuenta destino</label>
-                        <select id="toAccountSelect"></select>
-                        <input type="text" id="toAccountInput" placeholder="Número de cuenta"
+                        <select id="toAccountSelect">
+                            <option value="">Seleccione cuenta destino</option>
+                        </select>
+                        <input type="text" id="toAccountInput" placeholder="IBAN: CR01B04XXXXXXXXXXXX"
                             style="display:none; margin-top:0.5rem;">
 
                         <label for="amount">Monto</label>
-                        <input type="number" id="amount" placeholder="0.00">
+                        <input type="number" id="amount" placeholder="0.00" step="0.01" min="0.01">
 
                         <label for="concept">Concepto (opcional)</label>
-                        <input type="text" id="concept" placeholder="Pago / Transferencia">
+                        <input type="text" id="concept" placeholder="Descripción de la transferencia">
 
                         <button id="submitTransfer" class="btn-primary" style="justify-content: center;">Continuar</button>
                     </div>
 
                     <!-- Comprobante -->
                     <div class="transfer-receipt" style="display:none; margin-top:2rem;">
-                        <h3>Comprobante</h3>
+                        <h3>Comprobante de Transferencia</h3>
                         <div class="receipt-content">
-                            <p><strong>De:</strong> <span id="receiptFrom"></span></p>
-                            <p><strong>Para:</strong> <span id="receiptTo"></span></p>
-                            <p><strong>Monto:</strong> <span id="receiptAmount"></span></p>
-                            <p><strong>Concepto:</strong> <span id="receiptConcept"></span></p>
-                            <p><strong>Fecha:</strong> <span id="receiptDate"></span></p>
+                            <p><strong>De:</strong> <span id="receiptFrom">-</span></p>
+                            <p><strong>Para:</strong> <span id="receiptTo">-</span></p>
+                            <p><strong>Monto:</strong> <span id="receiptAmount">₡0.00</span></p>
+                            <p><strong>Concepto:</strong> <span id="receiptConcept">-</span></p>
+                            <p><strong>Fecha:</strong> <span id="receiptDate">-</span></p>
                         </div>
                         <div class="comprobante-actions">
-                            <button id="downloadBtn">Descargar PDF</button>
-                            <button id="shareBtn">Compartir</button>
+                            <button id="downloadBtn" class="btn-secondary">Descargar PDF</button>
+                            <button id="shareBtn" class="btn-secondary">Compartir</button>
                         </div>
                     </div>
 
@@ -260,8 +273,8 @@
                         <div class="modal-content">
                             <div id="modalMessage"></div>
                             <div class="modal-actions">
-                                <button id="modalClose">Cerrar</button>
-                                <button id="modalConfirm" style="display:none;">Confirmar</button>
+                                <button id="modalClose" class="btn-secondary">Cerrar</button>
+                                <button id="modalConfirm" class="btn-primary" style="display:none;">Confirmar</button>
                             </div>
                         </div>
                     </div>
@@ -276,6 +289,129 @@
         <div class="loading-spinner">
             <i class='bx bx-loader-alt'></i>
             <p>Cargando datos...</p>
+        </div>
+    </div>
+
+    <!-- Modal Crear Cuenta -->
+    <div class="modal hidden" id="modalCreateAccount">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crear Nueva Cuenta</h2>
+                <button class="close-modal" type="button" id="closeCreateAccount">&times;</button>
+            </div>
+            <form id="formCreateAccount">
+                <div class="input-box">
+                    <label for="accountAlias">Alias de la cuenta *</label>
+                    <input type="text" id="accountAlias" required placeholder="Ej: Cuenta Ahorros">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="accountIban">IBAN *</label>
+                    <input type="text" id="accountIban" required placeholder="CR01B04XXXXXXXXXXXX" maxlength="22">
+                    <small>Formato: CR01B04 + 12 dígitos</small>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="accountType">Tipo de Cuenta *</label>
+                    <select id="accountType" required>
+                        <option value="">Seleccione...</option>
+                    </select>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="accountCurrency">Moneda *</label>
+                    <select id="accountCurrency" required>
+                        <option value="">Seleccione...</option>
+                    </select>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="accountStatus">Estado *</label>
+                    <select id="accountStatus" required>
+                        <option value="">Seleccione...</option>
+                    </select>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="accountInitialBalance">Saldo Inicial</label>
+                    <input type="number" id="accountInitialBalance" step="0.01" min="0" value="0" placeholder="0.00">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelCreateAccount">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Cuenta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Crear Tarjeta -->
+    <div class="modal hidden" id="modalCreateCard">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Solicitar Nueva Tarjeta</h2>
+                <button class="close-modal" type="button" id="closeCreateCard">&times;</button>
+            </div>
+            <form id="formCreateCard">
+                <div class="input-box">
+                    <label for="cardType">Tipo de Tarjeta *</label>
+                    <select id="cardType" required>
+                        <option value="">Seleccione...</option>
+                    </select>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardNumber">Número de Tarjeta (enmascarado) *</label>
+                    <input type="text" id="cardNumber" required placeholder="4512 **** **** 1234" maxlength="19">
+                    <small>Formato: 4512 **** **** 1234</small>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardExpiry">Fecha de Expiración *</label>
+                    <input type="text" id="cardExpiry" required placeholder="MM/YYYY" maxlength="7">
+                    <small>Formato: MM/YYYY</small>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardCVV">CVV *</label>
+                    <input type="text" id="cardCVV" required placeholder="123" maxlength="3" pattern="\d{3}">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardPIN">PIN *</label>
+                    <input type="text" id="cardPIN" required placeholder="1234" maxlength="4" pattern="\d{4}">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardCurrency">Moneda *</label>
+                    <select id="cardCurrency" required>
+                        <option value="">Seleccione...</option>
+                    </select>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="input-box">
+                    <label for="cardLimit">Límite de Crédito *</label>
+                    <input type="number" id="cardLimit" required step="0.01" min="0" placeholder="500000.00">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelCreateCard">Cancelar</button>
+                    <button type="submit" class="btn-primary">Solicitar Tarjeta</button>
+                </div>
+            </form>
         </div>
     </div>
 

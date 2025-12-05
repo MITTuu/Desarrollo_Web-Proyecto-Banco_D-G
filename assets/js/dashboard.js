@@ -1,59 +1,74 @@
-import { getUserByName } from './get-data.js';
+// dashboard.js - Integrado con Backend
+import { api, getCurrentUser, removeAuthToken } from './api-config.js';
 
 let currentUser = null;
 let accounts = [];
-let transactions = [];
 let cards = [];
-let cardTransactions = [];
+
+// ----------- Verificar autenticación -----------
+function checkAuth() {
+    currentUser = getCurrentUser();
+    if (!currentUser) {
+        window.location.href = window.location.origin + '/index.html';
+        return false;
+    }
+    return true;
+}
 
 // ----------- Data Loading -----------
 async function loadAccounts() {
     try {
-        const response = await fetch('../assets/data/accounts.json');
-        if (!response.ok) throw new Error('No se pudo cargar accounts.json');
-        return await response.json();
+        // Sin userId en query, el backend usa automáticamente el del JWT
+        const response = await api.get('/accounts', {
+            requiresAuth: true,
+            redirectOnNoAuth: true
+        });
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+        return [];
     } catch (error) {
         console.error('Error loading accounts:', error);
         return [];
     }
 }
 
-async function loadTransactions() {
-    try {
-        const response = await fetch('../assets/data/transactions.json');
-        if (!response.ok) throw new Error('No se pudo cargar transactions.json');
-        return await response.json();
-    } catch (error) {
-        console.error('Error loading transactions:', error);
-        return [];
-    }
-}
-
 async function loadCards() {
     try {
-        const response = await fetch('../assets/data/cards.json');
-        if (!response.ok) throw new Error('No se pudo cargar cards.json');
-        return await response.json();
+        const response = await api.get(`/cards?userId=${currentUser.id}`, {
+            requiresAuth: true,
+            redirectOnNoAuth: true
+        });
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+        return [];
     } catch (error) {
         console.error('Error loading cards:', error);
         return [];
     }
 }
 
-async function loadCardTransactions() {
+async function loadAccountMovements(accountId, page = 1, pageSize = 5) {
     try {
-        const response = await fetch('../assets/data/card-transactions.json');
-        if (!response.ok) throw new Error('No se pudo cargar card-transactions.json');
-        return await response.json();
+        const response = await api.get(
+            `/accounts/${accountId}/movements?page=${page}&pageSize=${pageSize}`,
+            {
+                requiresAuth: true,
+                redirectOnNoAuth: true
+            }
+        );
+
+        if (response.success && response.data) {
+            return response.data.items || [];
+        }
+        return [];
     } catch (error) {
-        console.error('Error loading card transactions:', error);
+        console.error('Error loading movements:', error);
         return [];
     }
-}
-
-// ----------- User Management -----------
-async function getCurrentUser() {
-    return await getUserByName('user');
 }
 
 // ----------- Initialization -----------
@@ -61,30 +76,23 @@ async function init() {
     showLoading(true);
     
     try {
-        currentUser = await getCurrentUser();
-        if (!currentUser) {
-           window.location.href = window.location.origin + '/index.html';
-            return;
-        }
+        if (!checkAuth()) return;
 
-        const [allAccounts, allTransactions, allCards, allCardTransactions] = await Promise.all([
+        // Cargar datos del usuario
+        const [allAccounts, allCards] = await Promise.all([
             loadAccounts(),
-            loadTransactions(),
-            loadCards(),
-            loadCardTransactions()
+            loadCards()
         ]);
 
-        accounts = allAccounts.filter(account => account.propietario === currentUser.username);
-        transactions = allTransactions;
-        cards = allCards.filter(card => card.propietario === currentUser.username);
-        cardTransactions = allCardTransactions;
+        accounts = allAccounts;
+        cards = allCards;
 
         setupUI();
         setupNavigation();
         setupEventListeners();
         
         updateUserInfo();
-        loadOverviewData();
+        await loadOverviewData();
         
         handleHashNavigation();
         
@@ -98,7 +106,7 @@ async function init() {
 
 // ----------- Hash Navigation -----------
 function handleHashNavigation() {
-    const hash = window.location.hash.substring(1); // Remover el #
+    const hash = window.location.hash.substring(1); 
     
     if (hash) {
         showSection(hash);
@@ -118,7 +126,7 @@ function handleHashNavigation() {
 function setupUI() {
     const userName = document.getElementById('userName');
     if (userName && currentUser) {
-        userName.textContent = currentUser.username;
+        userName.textContent = currentUser.nombre || currentUser.usuario;
     }
 }
 
@@ -168,28 +176,23 @@ function setupEventListeners() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                removeAuthToken();
                 window.location.href = window.location.origin + '/index.html';
             }
         });
     }
 
-    /*
-    // Transfer cards
-    const ownTransfer = document.getElementById('ownTransfer');
-    const thirdPartyTransfer = document.getElementById('thirdPartyTransfer');
-    
-    if (ownTransfer) {
-        ownTransfer.addEventListener('click', () => {
-            //alert('Funcionalidad de transferencias entre cuentas propias');
-        });
+    // Botones de crear cuenta y tarjeta
+    const btnCreateAccount = document.getElementById('btnCreateAccount');
+    const btnCreateCard = document.getElementById('btnCreateCard');
+
+    if (btnCreateAccount) {
+        btnCreateAccount.addEventListener('click', openCreateAccountModal);
     }
-    
-    if (thirdPartyTransfer) {
-        thirdPartyTransfer.addEventListener('click', () => {
-            //alert('Funcionalidad de transferencias a terceros');
-        });
+
+    if (btnCreateCard) {
+        btnCreateCard.addEventListener('click', openCreateCardModal);
     }
-    */
 }
 
 // ----------- Section Management -----------
@@ -203,10 +206,8 @@ function showSection(sectionName) {
         targetSection.classList.add('active');
     }
     
-    // Actualizar título
     updatePageTitle(sectionName);
     
-    // Cargar datos específicos de la sección
     switch (sectionName) {
         case 'overview':
             loadOverviewData();
@@ -218,7 +219,6 @@ function showSection(sectionName) {
             loadCardsData();
             break;
         case 'transfers':
-            // No hay datos específicos que cargar
             break;
     }
 }
@@ -249,32 +249,38 @@ function updateUserInfo() {
     
     const userName = document.getElementById('userName');
     if (userName) {
-        userName.textContent = currentUser.username;
+        userName.textContent = currentUser.nombre || currentUser.usuario;
     }
 }
 
-function loadOverviewData() {
+async function loadOverviewData() {
     loadFeaturedAccount();
     loadAccountsSummary();
-    loadRecentTransactions();
+    await loadRecentTransactions();
     updateStats();
 }
 
 function loadFeaturedAccount() {
     if (accounts.length === 0) return;
     
-    // Usar la cuenta con mayor saldo como cuenta principal
+    // Usar la cuenta con mayor saldo
     const featuredAccount = accounts.reduce((prev, current) => 
-        current.saldo > prev.saldo ? current : prev
+        (current.saldoActual || 0) > (prev.saldoActual || 0) ? current : prev
     );
     
     const accountNumber = document.getElementById('featuredAccountNumber');
     const balance = document.getElementById('featuredBalance');
     const holder = document.getElementById('featuredHolder');
     
-    if (accountNumber) accountNumber.textContent = featuredAccount.numero_mascara;
-    if (balance) balance.textContent = formatCurrency(featuredAccount.saldo, featuredAccount.moneda);
-    if (holder) holder.textContent = currentUser?.username || 'Usuario';
+    if (accountNumber) {
+        accountNumber.textContent = formatIBAN(featuredAccount.iban);
+    }
+    if (balance) {
+        balance.textContent = formatAmount(featuredAccount.saldoActual || 0);
+    }
+    if (holder) {
+        holder.textContent = currentUser?.nombre || currentUser?.usuario || 'Usuario';
+    }
 }
 
 function loadAccountsSummary() {
@@ -283,29 +289,48 @@ function loadAccountsSummary() {
     
     accountsList.innerHTML = '';
     
+    if (accounts.length === 0) {
+        accountsList.innerHTML = '<p class="no-data">No tienes cuentas activas</p>';
+        return;
+    }
+    
     accounts.forEach(account => {
         const accountItem = createAccountItem(account);
         accountsList.appendChild(accountItem);
     });
 }
 
-function loadRecentTransactions() {
+async function loadRecentTransactions() {
     const recentTransactions = document.getElementById('recentTransactions');
     if (!recentTransactions) return;
     
-    // Obtener las últimas 5 transacciones
-    const userAccountIds = accounts.map(acc => acc.account_id);
-    const userTransactions = transactions
-        .filter(tx => userAccountIds.includes(tx.account_id))
-        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-        .slice(0, 5);
+    recentTransactions.innerHTML = '<p class="loading-text">Cargando movimientos...</p>';
     
-    recentTransactions.innerHTML = '';
+    if (accounts.length === 0) {
+        recentTransactions.innerHTML = '<p class="no-data">No hay movimientos recientes</p>';
+        return;
+    }
     
-    userTransactions.forEach(transaction => {
-        const transactionItem = createTransactionItem(transaction);
-        recentTransactions.appendChild(transactionItem);
-    });
+    try {
+        // Cargar movimientos de la primera cuenta (o la principal)
+        const mainAccount = accounts[0];
+        const movements = await loadAccountMovements(mainAccount.id, 1, 5);
+        
+        recentTransactions.innerHTML = '';
+        
+        if (movements.length === 0) {
+            recentTransactions.innerHTML = '<p class="no-data">No hay movimientos recientes</p>';
+            return;
+        }
+        
+        movements.forEach(movement => {
+            const transactionItem = createTransactionItem(movement);
+            recentTransactions.appendChild(transactionItem);
+        });
+    } catch (error) {
+        console.error('Error loading recent transactions:', error);
+        recentTransactions.innerHTML = '<p class="error-text">Error al cargar movimientos</p>';
+    }
 }
 
 function updateStats() {
@@ -315,7 +340,12 @@ function updateStats() {
     
     if (totalAccounts) totalAccounts.textContent = accounts.length;
     if (totalCards) totalCards.textContent = cards.length;
-    if (monthlyIncome) monthlyIncome.textContent = '+15.2%'; // Mock data
+    
+    // Calcular balance total
+    const totalBalance = accounts.reduce((sum, acc) => sum + (acc.saldoActual || 0), 0);
+    if (monthlyIncome) {
+        monthlyIncome.textContent = formatAmount(totalBalance);
+    }
 }
 
 function loadAccountsData() {
@@ -323,6 +353,11 @@ function loadAccountsData() {
     if (!accountsGrid) return;
     
     accountsGrid.innerHTML = '';
+    
+    if (accounts.length === 0) {
+        accountsGrid.innerHTML = '<p class="no-data">No tienes cuentas activas</p>';
+        return;
+    }
     
     accounts.forEach(account => {
         const accountCard = createAccountCard(account);
@@ -351,18 +386,22 @@ function loadCardsData() {
 function createAccountItem(account) {
     const item = document.createElement('div');
     item.className = 'account-item';
+    
+    const tipoCuenta = account.tipoCuenta?.nombre || account.tipo || 'Cuenta';
+    const moneda = account.moneda?.codigo || account.currency || 'CRC';
+    
     item.innerHTML = `
         <div class="account-info">
             <div class="account-icon">
-                <i class='bx ${account.tipo === 'Ahorro' ? 'bx-piggy-bank' : 'bx-wallet'}'></i>
+                <i class='bx ${tipoCuenta.includes('Ahorro') ? 'bx-piggy-bank' : 'bx-wallet'}'></i>
             </div>
             <div class="account-details">
-                <h4>${account.alias}</h4>
-                <p>${account.numero_mascara} • ${account.tipo}</p>
+                <h4>${account.aliass || 'Cuenta'}</h4>
+                <p>${formatIBAN(account.iban)} • ${tipoCuenta}</p>
             </div>
         </div>
         <div class="account-balance">
-            ${formatCurrency(account.saldo, account.moneda)}
+            ${formatCurrency(account.saldo || 0, moneda)}
         </div>
     `;
     
@@ -373,11 +412,12 @@ function createAccountItem(account) {
     return item;
 }
 
-function createTransactionItem(transaction) {
+function createTransactionItem(movement) {
     const item = document.createElement('div');
     item.className = 'transaction-item';
     
-    const isCredit = transaction.tipo === 'CREDITO';
+    const typeName = movement.tipo?.nombre?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const isCredit = typeName === "credito" || movement.tipoMovimiento?.toUpperCase() === "CREDITO";
     const amountClass = isCredit ? 'credit' : 'debit';
     const amountSign = isCredit ? '+' : '-';
     const icon = isCredit ? 'bx-trend-up' : 'bx-trend-down';
@@ -388,12 +428,12 @@ function createTransactionItem(transaction) {
                 <i class='bx ${icon}'></i>
             </div>
             <div class="transaction-details">
-                <h4>${transaction.descripcion}</h4>
-                <p>${formatDate(transaction.fecha)}</p>
+                <h4>${movement.descripcion || 'Movimiento'}</h4>
+                <p>${formatDate(movement.fecha)}</p>
             </div>
         </div>
         <div class="transaction-amount ${amountClass}">
-            ${amountSign}${formatCurrency(transaction.monto, transaction.moneda)}
+            ${amountSign}${formatCurrency(movement.monto, movement.moneda?.codigo || 'CRC')}
         </div>
     `;
     
@@ -403,15 +443,19 @@ function createTransactionItem(transaction) {
 function createAccountCard(account) {
     const card = document.createElement('div');
     card.className = 'account-card';
+    
+    const tipoCuenta = account.tipoCuenta?.nombre || 'Cuenta';
+    const moneda = account.moneda?.codigo || 'CRC';
+    
     card.innerHTML = `
         <div class="account-card-header">
-            <h3>${account.alias}</h3>
-            <span class="account-type">${account.tipo}</span>
+            <h3>${account.aliass || 'Cuenta'}</h3>
+            <span class="account-type">${tipoCuenta}</span>
         </div>
         <div class="account-card-body">
-            <div class="account-number">${account.numero_mascara}</div>
+            <div class="account-number">${formatIBAN(account.iban)}</div>
             <div class="account-balance-large">
-                ${formatCurrency(account.saldo, account.moneda)}
+                ${formatCurrency(account.saldo || 0, moneda)}
             </div>
         </div>
         <div class="account-card-footer">
@@ -420,7 +464,6 @@ function createAccountCard(account) {
         </div>
     `;
     
-    // Event listeners para los botones
     const detailBtn = card.querySelector('.btn-secondary');
     const transferBtn = card.querySelector('.btn-primary');
     
@@ -433,15 +476,35 @@ function createAccountCard(account) {
 function createCreditCard(card) {
     const cardElement = document.createElement('div');
     cardElement.className = 'credit-card';
-    cardElement.style.background = card.gradiente;
-    
-    // Determinar el color del texto basado en el tipo de tarjeta
-    const textColor = card.tipo === 'Black' ? '#ffffff' : card.tipo === 'Platinum' ? '#333333' : '#333333';
-    
+
+    console.log("Tipo recibido desde backend:", card.tipo_nombre);
+
+    // MAPEO: tipo backend → visual frontend
+    const mapTipo = {
+        "Credito": "Gold",
+        "Debito": "Classic"
+    };
+
+    const tipoTarjeta = mapTipo[card.tipo_nombre] || "Classic";
+
+    // Colores disponibles
+    const gradientes = {
+        'Platinum': 'linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 100%)',
+        'Gold': 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)',
+        'Black': 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+        'Classic': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    };
+
+    const gradiente = gradientes[tipoTarjeta] || gradientes['Classic'];
+    const textColor = tipoTarjeta === 'Black' ? '#ffffff' : '#333333';
+    const moneda = card.moneda_iso || 'CRC';
+
+    cardElement.style.background = gradiente;
+
     cardElement.innerHTML = `
         <div class="credit-card-inner" style="color: ${textColor};">
             <div class="card-header">
-                <div class="card-type-badge">${card.tipo}</div>
+                <div class="card-type-badge">${tipoTarjeta}</div>
                 <div class="card-brand">Bank D&G</div>
             </div>
             
@@ -450,30 +513,30 @@ function createCreditCard(card) {
             </div>
             
             <div class="card-number">
-                ${card.numero_mascara}
+                ${card.numero_enmascarado}
             </div>
             
             <div class="card-details">
                 <div class="card-holder">
                     <div class="label">TITULAR</div>
-                    <div class="value">${card.titular}</div>
+                    <div class="value">${currentUser.nombre || currentUser.usuario}</div>
                 </div>
                 <div class="card-expiry">
                     <div class="label">VÁLIDA HASTA</div>
-                    <div class="value">${card.exp}</div>
+                    <div class="value">${card.fecha_expiracion}</div>
                 </div>
             </div>
             
             <div class="card-footer">
                 <div class="card-balance">
-                    <div class="available">Disponible: ${formatCurrency(card.saldo_disponible, card.moneda)}</div>
-                    <div class="limit">Límite: ${formatCurrency(card.limite, card.moneda)}</div>
+                    <div class="available">Disponible: ${formatCurrency(card.saldo_actual, moneda)}</div>
+                    <div class="limit">Límite: ${formatCurrency(card.limite_credito, moneda)}</div>
                 </div>
                 <div class="card-actions">
-                    <button class="btn-card-action btn-detail" data-card-id="${card.card_id}">
+                    <button class="btn-card-action btn-detail" data-card-id="${card.id}">
                         <i class='bx bx-detail'></i>
                     </button>
-                    <button class="btn-card-action btn-pin" data-card-id="${card.card_id}">
+                    <button class="btn-card-action btn-pin" data-card-id="${card.id}">
                         <i class='bx bx-lock-open'></i>
                     </button>
                 </div>
@@ -481,27 +544,25 @@ function createCreditCard(card) {
         </div>
     `;
     
-    // Event listeners para los botones
     const detailBtn = cardElement.querySelector('.btn-detail');
     const pinBtn = cardElement.querySelector('.btn-pin');
     
     if (detailBtn) {
         detailBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            showCardDetail(card.card_id);
+            showCardDetail(card.id);
         });
     }
     
     if (pinBtn) {
         pinBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            consultPin(card.card_id);
+            consultPin(card.id);
         });
     }
     
-    // Event listener para toda la tarjeta
     cardElement.addEventListener('click', () => {
-        showCardDetail(card.card_id);
+        showCardDetail(card.id);
     });
     
     return cardElement;
@@ -509,20 +570,33 @@ function createCreditCard(card) {
 
 // ----------- Card Functions -----------
 function showCardDetail(cardId) {
-    // Redirigir a la página de detalle con el ID de la tarjeta
     window.location.href = `card-detail.html?cardId=${encodeURIComponent(cardId)}`;
 }
 
-function consultPin(cardId) {
-    const card = cards.find(c => c.card_id === cardId);
-    if (!card) return;
-    
-    showPinConsultModal(card);
+async function consultPin(cardId) {
+    try {
+        // Solicitar OTP
+        const otpResponse = await api.post(`/cards/${cardId}/otp`, {}, {
+            requiresAuth: true
+        });
+        
+        if (otpResponse.success) {
+            // Mostrar modal para ingresar OTP
+            showPinConsultModal(cardId);
+        } else {
+            alert('Error al solicitar código de verificación');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Error al solicitar código');
+    }
 }
 
 // ----------- PIN Consultation Modal -----------
-function showPinConsultModal(card) {
-    // Crear modal dinámicamente
+function showPinConsultModal(cardId) {
+    const card = cards.find(c => c.id === cardId);
+    if (!card) return;
+    
     const modal = document.createElement('div');
     modal.className = 'pin-modal';
     modal.innerHTML = `
@@ -545,18 +619,14 @@ function showPinConsultModal(card) {
                         <span class="error-message"></span>
                     </div>
                     <div class="pin-buttons">
-                        <button class="btn-secondary" onclick="resendPinCode()">Reenviar código</button>
-                        <button class="btn-primary" onclick="verifyPinCode('${card.card_id}')">Verificar</button>
+                        <button class="btn-secondary" onclick="resendPinCode('${cardId}')">Reenviar código</button>
+                        <button class="btn-primary" onclick="verifyPinCode('${cardId}')">Verificar</button>
                     </div>
                 </div>
                 
                 <div class="pin-step" data-step="2">
                     <h3>Información de la Tarjeta</h3>
                     <div class="pin-card-info">
-                        <div class="pin-card-preview" style="background: ${card.gradiente};">
-                            <div class="pin-card-type">${card.tipo}</div>
-                            <div class="pin-card-number">${card.numero_mascara}</div>
-                        </div>
                         <div class="pin-details">
                             <div class="pin-detail-row">
                                 <span class="label">CVV:</span>
@@ -565,9 +635,6 @@ function showPinConsultModal(card) {
                             <div class="pin-detail-row">
                                 <span class="label">PIN:</span>
                                 <span class="value pin-sensitive" id="cardPin">****</span>
-                                <button class="copy-btn" onclick="copyPin('${card.pin}')">
-                                    <i class='bx bx-copy'></i>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -586,7 +653,6 @@ function showPinConsultModal(card) {
     
     document.body.appendChild(modal);
     
-    // Event listeners
     const closeBtn = modal.querySelector('.close-pin-modal');
     closeBtn.addEventListener('click', () => closePinModal(modal));
     
@@ -596,40 +662,65 @@ function showPinConsultModal(card) {
 }
 
 // Global functions for PIN modal
-window.verifyPinCode = function(cardId) {
+window.verifyPinCode = async function(cardId) {
     const code = document.getElementById('pinVerificationCode').value;
     const errorSpan = document.querySelector('#pinVerificationCode + .error-message');
     
-    if (code !== '123456') {
-        errorSpan.textContent = 'Código incorrecto. Intenta nuevamente.';
+    if (!code || code.length !== 6) {
+        errorSpan.textContent = 'Ingrese un código de 6 dígitos';
         return;
     }
     
     errorSpan.textContent = '';
     
-    // Mostrar loading
     const loading = document.querySelector('.pin-loading');
     loading.style.display = 'block';
     
-    setTimeout(() => {
+    try {
+        const response = await api.post(`/cards/${cardId}/view-details`, {
+            otpCode: code
+        }, {
+            requiresAuth: true
+        });
+        
         loading.style.display = 'none';
-        showPinInformation(cardId);
-    }, 1500);
+        
+        if (response.success && response.data) {
+            showPinInformation(response.data);
+        } else {
+            errorSpan.textContent = 'Código incorrecto';
+        }
+    } catch (error) {
+        loading.style.display = 'none';
+        errorSpan.textContent = error.message || 'Código incorrecto';
+    }
 };
 
-function showPinInformation(cardId) {
-    const card = cards.find(c => c.card_id === cardId);
-    if (!card) return;
-    
-    // Cambiar al paso 2
+window.resendPinCode = async function(cardId) {
+    try {
+        await api.post(`/cards/${cardId}/otp`, {}, {
+            requiresAuth: true
+        });
+        
+        const codeMessage = document.querySelector('.code-sent-message span');
+        if (codeMessage) {
+            codeMessage.textContent = 'Código reenviado a tu correo electrónico';
+            setTimeout(() => {
+                codeMessage.textContent = 'Código de verificación enviado a tu correo electrónico';
+            }, 3000);
+        }
+    } catch (error) {
+        alert(error.message || 'Error al reenviar código');
+    }
+};
+
+function showPinInformation(cardData) {
     document.querySelector('.pin-step[data-step="1"]').classList.remove('active');
     document.querySelector('.pin-step[data-step="2"]').classList.add('active');
     
-    // Mostrar información
-    document.getElementById('cardCvv').textContent = card.cvv;
-    document.getElementById('cardPin').textContent = card.pin;
+    document.getElementById('cardCvv').textContent = cardData.cvv;
+    document.getElementById('cardPin').textContent = cardData.pin;
     
-    // Iniciar timer de 10 segundos
     let timer = 10;
     const timerElement = document.getElementById('pinTimer');
     
@@ -639,7 +730,6 @@ function showPinInformation(cardId) {
         
         if (timer <= 0) {
             clearInterval(interval);
-            // Ocultar información sensible
             document.getElementById('cardCvv').textContent = '***';
             document.getElementById('cardPin').textContent = '****';
             document.querySelector('.pin-timer').innerHTML = '<span style="color: #e74c3c;">Información ocultada por seguridad</span>';
@@ -647,40 +737,24 @@ function showPinInformation(cardId) {
     }, 1000);
 }
 
-window.resendPinCode = function() {
-    // Mostrar mensaje de reenvío en el modal
-    const codeMessage = document.querySelector('.code-sent-message');
-    if (codeMessage) {
-        // Cambiar temporalmente el mensaje
-        const originalContent = codeMessage.innerHTML;
-        codeMessage.innerHTML = `
-            <i class='bx bx-check-circle'></i>
-            <span>Código reenviado a tu correo electrónico</span>
-        `;
-        
-        // Volver al mensaje original después de 3 segundos
-        setTimeout(() => {
-            codeMessage.innerHTML = originalContent;
-        }, 3000);
-    }
-};
-
-window.copyPin = function(pin) {
-    navigator.clipboard.writeText(pin).then(() => {
-        alert('PIN copiado al portapapeles');
-    }).catch(() => {
-        alert('No se pudo copiar el PIN');
-    });
-};
-
 function closePinModal(modal) {
     document.body.removeChild(modal);
 }
 
 // ----------- Helper Functions -----------
-function formatCurrency(amount, currency) {
+function formatCurrency(amount, currency = 'CRC') {
     const symbol = currency === 'USD' ? '$' : '₡';
-    return `${symbol}${amount.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
+    return `${symbol}${parseFloat(amount).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatAmount(amount) {
+    return parseFloat(amount).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatIBAN(iban) {
+    if (!iban) return '****';
+    // Formato: CR01 B04 XXXXXXXXXXXX -> mostrar últimos 4
+    return `**** **** **** ${iban.slice(-4)}`;
 }
 
 function formatDate(dateString) {
@@ -704,18 +778,297 @@ function showLoading(show) {
 }
 
 function showError(message) {
-    alert(message); // En una app real, usaríamos un toast o modal
+    alert(message);
 }
 
 // ----------- Placeholder Functions -----------
 function showAccountDetail(account) {
-    // Redirigir a la página de detalle con el ID de la cuenta
-    window.location.href = `account-detail.html?accountId=${encodeURIComponent(account.account_id)}`;
+    window.location.href = `account-detail.html?accountId=${encodeURIComponent(account.id)}`;
 }
 
 function startTransfer(account) {
-    alert(`Iniciar transferencia desde: ${account.alias}`);
+    // Ir a la sección de transferencias
+    window.location.hash = 'transfers';
+    showSection('transfers');
 }
 
 // ----------- Initialize -----------
 document.addEventListener('DOMContentLoaded', init);
+
+// ----------- Modal Crear Cuenta -----------
+let accountTypes = [];
+let currencies = [];
+let cardTypes = [];
+let accountStatuses = [];
+
+async function loadCatalogData() {
+    try {
+        // Cargar tipos de cuenta
+        const typesResponse = await api.get('/catalog/account-types', { requiresAuth: true });
+        if (typesResponse.success && typesResponse.data) {
+            accountTypes = typesResponse.data;
+        }
+
+        // Cargar monedas
+        const currenciesResponse = await api.get('/catalog/currencies', { requiresAuth: true });
+        if (currenciesResponse.success && currenciesResponse.data) {
+            currencies = currenciesResponse.data;
+        }
+
+        // Cargar tipos de tarjeta
+        const cardTypesResponse = await api.get('/catalog/card-types', { requiresAuth: true });
+        if (cardTypesResponse.success && cardTypesResponse.data) {
+            cardTypes = cardTypesResponse.data;
+        }
+
+        // Cargar estados de cuenta
+        const statusesResponse = await api.get('/catalog/account-statuses', { requiresAuth: true });
+        if (statusesResponse.success && statusesResponse.data) {
+            accountStatuses = statusesResponse.data;
+        }
+    } catch (error) {
+        console.error('Error loading catalog data:', error);
+    }
+}
+
+function openCreateAccountModal() {
+    const modal = document.getElementById('modalCreateAccount');
+    const typeSelect = document.getElementById('accountType');
+    const currencySelect = document.getElementById('accountCurrency');
+    const statusSelect = document.getElementById('accountStatus');
+
+    // Llenar tipos de cuenta
+    typeSelect.innerHTML = '<option value="">Seleccione...</option>';
+    if (accountTypes.length > 0) {
+        accountTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.nombre;
+            typeSelect.appendChild(option);
+        });
+    }
+
+    // Llenar monedas
+    currencySelect.innerHTML = '<option value="">Seleccione...</option>';
+    if (currencies.length > 0) {
+        currencies.forEach(curr => {
+            const option = document.createElement('option');
+            option.value = curr.id;
+            option.textContent = `${curr.nombre} (${curr.iso})`;
+            currencySelect.appendChild(option);
+        });
+    }
+
+    // Llenar estados
+    statusSelect.innerHTML = '<option value="">Seleccione...</option>';
+    if (accountStatuses.length > 0) {
+        accountStatuses.forEach(status => {
+            const option = document.createElement('option');
+            option.value = status.id;
+            option.textContent = status.nombre;
+            statusSelect.appendChild(option);
+            
+            // Seleccionar "Activa" por defecto si existe
+            if (status.nombre === 'Activa') {
+                option.selected = true;
+            }
+        });
+    }
+
+    modal.classList.remove('hidden');
+
+    // Event listeners
+    document.getElementById('closeCreateAccount').onclick = () => closeModal('modalCreateAccount');
+    document.getElementById('cancelCreateAccount').onclick = () => closeModal('modalCreateAccount');
+    document.getElementById('formCreateAccount').onsubmit = handleCreateAccount;
+}
+
+async function handleCreateAccount(e) {
+    e.preventDefault();
+
+    const aliass = document.getElementById('accountAlias').value.trim();
+    const iban = document.getElementById('accountIban').value.trim().toUpperCase();
+    const tipoCuenta = document.getElementById('accountType').value;
+    const moneda = document.getElementById('accountCurrency').value;
+    const estado = document.getElementById('accountStatus').value;
+    const saldoInicial = parseFloat(document.getElementById('accountInitialBalance').value) || 0;
+
+    // Validar IBAN
+    if (!validateIBAN(iban)) {
+        showModalError('accountIban', 'IBAN inválido. Formato: CR01B04XXXXXXXXXXXX (22 caracteres)');
+        return;
+    }
+
+    try {
+        showLoading(true);
+
+        const response = await api.post('/accounts', {
+            usuarioId: currentUser.id,
+            iban: iban,
+            aliass: aliass,
+            tipoCuenta: tipoCuenta,
+            moneda: moneda,
+            estado: estado,
+            saldoInicial: saldoInicial
+        }, {
+            requiresAuth: true
+        });
+
+        showLoading(false);
+
+        if (response.success) {
+            closeModal('modalCreateAccount');
+            alert('¡Cuenta creada exitosamente!');
+            
+            // Recargar cuentas
+            accounts = await loadAccounts();
+            loadAccountsData();
+            loadAccountsSummary();
+            loadFeaturedAccount();
+            updateStats();
+        } else {
+            alert(response.message || 'Error al crear cuenta');
+        }
+    } catch (error) {
+        showLoading(false);
+        console.error('Error creating account:', error);
+        alert(error.message || 'Error al crear cuenta');
+    }
+}
+
+function openCreateCardModal() {
+    const modal = document.getElementById('modalCreateCard');
+    const typeSelect = document.getElementById('cardType');
+    const currencySelect = document.getElementById('cardCurrency');
+
+    // Llenar tipos de tarjeta
+    typeSelect.innerHTML = '<option value="">Seleccione...</option>';
+    if (cardTypes.length > 0) {
+        cardTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.nombre;
+            typeSelect.appendChild(option);
+        });
+    }
+
+    // Llenar monedas
+    currencySelect.innerHTML = '<option value="">Seleccione...</option>';
+    if (currencies.length > 0) {
+        currencies.forEach(curr => {
+            const option = document.createElement('option');
+            option.value = curr.id;
+            option.textContent = `${curr.nombre} (${curr.iso})`;
+            currencySelect.appendChild(option);
+        });
+    }
+
+    modal.classList.remove('hidden');
+
+    // Event listeners
+    document.getElementById('closeCreateCard').onclick = () => closeModal('modalCreateCard');
+    document.getElementById('cancelCreateCard').onclick = () => closeModal('modalCreateCard');
+    document.getElementById('formCreateCard').onsubmit = handleCreateCard;
+}
+
+async function handleCreateCard(e) {
+    e.preventDefault();
+
+    const tipo = document.getElementById('cardType').value;
+    const numeroEnmascarado = document.getElementById('cardNumber').value.trim();
+    const fechaExpiracion = document.getElementById('cardExpiry').value.trim();
+    const cvv = document.getElementById('cardCVV').value.trim();
+    const pin = document.getElementById('cardPIN').value.trim();
+    const moneda = document.getElementById('cardCurrency').value;
+    const limiteCredito = parseFloat(document.getElementById('cardLimit').value) || 0;
+
+    // Validaciones
+    if (!/^\d{4}\s\*{4}\s\*{4}\s\d{4}$/.test(numeroEnmascarado)) {
+        showModalError('cardNumber', 'Formato inválido. Ejemplo: 4512 **** **** 1234');
+        return;
+    }
+
+    if (!/^\d{2}\/\d{4}$/.test(fechaExpiracion)) {
+        showModalError('cardExpiry', 'Formato inválido. Ejemplo: 12/2027');
+        return;
+    }
+
+    if (!/^\d{3}$/.test(cvv)) {
+        showModalError('cardCVV', 'CVV debe tener 3 dígitos');
+        return;
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+        showModalError('cardPIN', 'PIN debe tener 4 dígitos');
+        return;
+    }
+
+    try {
+        showLoading(true);
+
+        const response = await api.post('/cards', {
+            usuarioId: currentUser.id,
+            tipo: tipo,
+            numeroEnmascarado: numeroEnmascarado,
+            fechaExpiracion: fechaExpiracion,
+            cvv: cvv,
+            pin: pin,
+            moneda: moneda,
+            limiteCredito: limiteCredito,
+            saldoActual: 0
+        }, {
+            requiresAuth: true
+        });
+
+        showLoading(false);
+
+        if (response.success) {
+            closeModal('modalCreateCard');
+            alert('¡Tarjeta solicitada exitosamente!');
+            
+            // Recargar tarjetas
+            cards = await loadCards();
+            loadCardsData();
+            updateStats();
+        } else {
+            alert(response.message || 'Error al crear tarjeta');
+        }
+    } catch (error) {
+        showLoading(false);
+        console.error('Error creating card:', error);
+        alert(error.message || 'Error al crear tarjeta');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        
+        // Limpiar formulario
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+            // Limpiar mensajes de error
+            form.querySelectorAll('.error-message').forEach(span => span.textContent = '');
+        }
+    }
+}
+
+function showModalError(inputId, message) {
+    const input = document.getElementById(inputId);
+    const errorSpan = input.parentElement.querySelector('.error-message');
+    if (errorSpan) {
+        errorSpan.textContent = message;
+        input.classList.add('error');
+    }
+}
+
+function validateIBAN(iban) {
+    // Formato: CR01B04XXXXXXXXXXXX (22 caracteres)
+    const ibanRegex = /^CR\d{2}B\d{2}\d{12}$/;
+    return ibanRegex.test(iban);
+}
+
+// Cargar datos de catálogo al inicializar
+init().then(() => loadCatalogData());

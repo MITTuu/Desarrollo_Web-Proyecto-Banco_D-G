@@ -1,4 +1,5 @@
-import { getUserByName } from './get-data.js';
+// accounts.js - Integrado con Backend
+import { api, getCurrentUser, removeAuthToken } from './api-config.js';
 
 let currentUser = null;
 let currentAccount = null;
@@ -7,6 +8,16 @@ let filteredTransactions = [];
 let currentPage = 1;
 const transactionsPerPage = 10;
 
+// ----------- Verificar autenticación -----------
+function checkAuth() {
+    currentUser = getCurrentUser();
+    if (!currentUser) {
+        window.location.href = window.location.origin + '/index.html';
+        return false;
+    }
+    return true;
+}
+
 // ----------- URL Parameters -----------
 function getAccountIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -14,40 +25,92 @@ function getAccountIdFromUrl() {
 }
 
 // ----------- Data Loading -----------
-async function loadAccounts() {
+async function loadAccountById(accountId) {
     try {
-        const response = await fetch('../assets/data/accounts.json');
-        if (!response.ok) throw new Error('No se pudo cargar accounts.json');
-        return await response.json();
+        const response = await api.get(`/accounts/${accountId}`, {
+            requiresAuth: true,
+            redirectOnNoAuth: true
+        });
+
+        if (response.success && response.data) {
+            return response.data;
+        }
+        return null;
     } catch (error) {
-        console.error('Error loading accounts:', error);
+        console.error('Error loading account:', error);
+        return null;
+    }
+}
+
+async function loadAccountMovements(accountId, page = 1, pageSize = 50) {
+    try {
+        const response = await api.get(
+            `/accounts/${accountId}/movements?page=${page}&pageSize=${pageSize}`,
+            {
+                requiresAuth: true,
+                redirectOnNoAuth: true
+            }
+        );
+
+        if (response.success && response.data) {
+            return response.data.items || [];
+        }
+        return [];
+    } catch (error) {
+        console.error('Error loading movements:', error);
         return [];
     }
 }
 
-async function loadTransactionsAPI() {
+async function loadAccountBalance(accountId) {
     try {
-        const response = await fetch('../assets/data/transactions.json');
-        if (!response.ok) throw new Error('No se pudo cargar transactions.json');
-        return await response.json();
+        const response = await api.get(
+            `/accounts/${accountId}/movements?page=1&pageSize=5000`,
+            {
+                requiresAuth: true,
+                redirectOnNoAuth: true
+            }
+        );
+
+        if (!response.success || !response.data) {
+            throw new Error("Error al cargar movimientos");
+        }
+
+        const movimientos = response.data.items || [];
+
+        let saldo = 0;
+
+        movimientos.forEach(mov => {
+            const tipo = mov.tipo.nombre.toUpperCase();
+            const monto = Number(mov.monto);
+
+            if (tipo === "Credito".toUpperCase()) {
+                saldo += monto;
+            } else if (tipo === "Debito".toUpperCase()) {
+                saldo -= monto;
+            }
+        });
+
+        const saldoFormateado = saldo.toLocaleString("es-CR", {
+            style: "currency",
+            currency: "CRC"
+        });
+
+        document.getElementById("accountBalance").textContent = saldoFormateado;
+        document.getElementById("lastUpdate").textContent = "Ahora mismo";
+
     } catch (error) {
-        console.error('Error loading transactions:', error);
-        return [];
+        console.error("Error calculando el saldo:", error);
+        document.getElementById("accountBalance").textContent = "Error";
     }
 }
 
-async function getCurrentUser() {
-    return await getUserByName('user');
-}
+
 
 // ----------- Initialization -----------
 async function init() {
     try {
-        currentUser = await getCurrentUser();
-        if (!currentUser) {
-           window.location.href = window.location.origin + '/index.html';
-            return;
-        }
+        if (!checkAuth()) return;
 
         const accountId = getAccountIdFromUrl();
         if (!accountId) {
@@ -55,22 +118,23 @@ async function init() {
             return;
         }
 
-        const [accounts, transactions] = await Promise.all([
-            loadAccounts(),
-            loadTransactionsAPI()
-        ]);
+        showLoadingState();
 
-        currentAccount = accounts.find(acc => 
-            acc.account_id === accountId && acc.propietario === currentUser.username
-        );
+        // Cargar cuenta y movimientos
+        currentAccount = await loadAccountById(accountId);
+        loadAccountBalance(accountId);
+
 
         if (!currentAccount) {
             showError('Cuenta no encontrada');
             return;
         }
 
-        allTransactions = transactions.filter(tx => tx.account_id === accountId);
+        
+        // Cargar movimientos
+        allTransactions = calcularSaldos(await loadAccountMovements(accountId));
         filteredTransactions = [...allTransactions];
+
 
         setupUI();
         setupEventListeners();
@@ -88,7 +152,7 @@ async function init() {
 function setupUI() {
     const userName = document.getElementById('userName');
     if (userName && currentUser) {
-        userName.textContent = currentUser.username;
+        userName.textContent = currentUser.nombre || currentUser.usuario;
     }
 }
 
@@ -115,7 +179,6 @@ function setupEventListeners() {
             }
             
             e.preventDefault();
-            
             const sectionText = link.querySelector('span').textContent;
             
             if (window.innerWidth <= 768) {
@@ -151,6 +214,7 @@ function setupEventListeners() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                removeAuthToken();
                 window.location.href = window.location.origin + '/index.html';
             }
         });
@@ -159,7 +223,7 @@ function setupEventListeners() {
     const transferBtn = document.getElementById('transferBtn');
     if (transferBtn) {
         transferBtn.addEventListener('click', () => {
-            alert('Funcionalidad de transferencias (pendiente de implementar)');
+            window.location.href = 'dashboard.html#transfers';
         });
     }
 
@@ -195,17 +259,20 @@ function setupEventListeners() {
 function updateAccountInfo() {
     if (!currentAccount) return;
 
-    document.getElementById('accountAlias').textContent = currentAccount.alias;
-    document.getElementById('accountAliasDetail').textContent = currentAccount.alias;
+    const tipoCuenta = currentAccount.tipoCuenta?.nombre || 'Cuenta';
+    const moneda = currentAccount.moneda?.codigo || 'CRC';
+
+    document.getElementById('accountAlias').textContent = currentAccount.aliass || 'Cuenta';
+    document.getElementById('accountAliasDetail').textContent = currentAccount.aliass || 'Cuenta';
     
-    document.getElementById('accountNumber').textContent = currentAccount.account_id;
-    document.getElementById('accountType').textContent = currentAccount.tipo;
-    document.getElementById('accountCurrency').textContent = currentAccount.moneda;
-    document.getElementById('accountBalance').textContent = formatCurrency(currentAccount.saldo, currentAccount.moneda);
+    document.getElementById('accountNumber').textContent = formatIBAN(currentAccount.iban);
+    document.getElementById('accountType').textContent = tipoCuenta;
+    document.getElementById('accountCurrency').textContent = moneda;
+    document.getElementById('accountBalance').textContent = formatCurrency(currentAccount.saldoActual || 0, moneda);
     
     const icon = document.getElementById('accountIcon');
     if (icon) {
-        icon.className = currentAccount.tipo === 'Ahorro' ? 'bx bx-piggy-bank' : 'bx bx-wallet';
+        icon.className = tipoCuenta.includes('Ahorro') ? 'bx bx-piggy-bank' : 'bx bx-wallet';
     }
     
     document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('es-CR');
@@ -227,9 +294,10 @@ function applyFilters() {
 
     filteredTransactions = allTransactions.filter(transaction => {
         const matchesSearch = !searchTerm || 
-            transaction.descripcion.toLowerCase().includes(searchTerm);
+            (transaction.descripcion && transaction.descripcion.toLowerCase().includes(searchTerm));
 
-        const matchesType = !typeFilter || transaction.tipo === typeFilter;
+        const tipoMovimiento = transaction.tipo?.nombre || transaction.tipoMovimiento;
+        const matchesType = !typeFilter || tipoMovimiento === typeFilter;
 
         const matchesDate = filterByDate(transaction, dateFilter);
 
@@ -242,7 +310,6 @@ function applyFilters() {
 
 function filterByDate(transaction, dateFilter) {
     if (!dateFilter) return true;
-    console.log(new Date("2025-09-27T14:15:00Z").toLocaleDateString('es-CR'));
 
     const transactionDate = new Date(transaction.fecha);
     const now = new Date();
@@ -319,12 +386,10 @@ function showTransactionsList() {
     const transactionsList = document.getElementById('transactionsList');
     transactionsList.style.display = 'block';
     
-    // Calculate pagination
     const startIndex = (currentPage - 1) * transactionsPerPage;
     const endIndex = startIndex + transactionsPerPage;
     const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
     
-    // Generate HTML
     transactionsList.innerHTML = pageTransactions.map(transaction => 
         createTransactionRow(transaction)
     ).join('');
@@ -337,13 +402,22 @@ function hideAllStates() {
     document.getElementById('transactionsList').style.display = 'none';
 }
 
+
+
+
+
 // ----------- Transaction Row Creation -----------
 function createTransactionRow(transaction) {
-    const isCredit = transaction.tipo === 'CREDITO';
-    const amountClass = isCredit ? 'credit' : 'debit';
-    const amountSign = isCredit ? '+' : '-';
-    const icon = isCredit ? 'bx-trend-up' : 'bx-trend-down';
+    const tipoMovimiento = transaction.tipo?.nombre || transaction.tipoMovimiento || '';
+    const normalizedTipo = tipoMovimiento.toLowerCase();
+    const isCredit = normalizedTipo === "credito";
     
+    const amountClass = isCredit ? "credit" : "debit";
+    const amountSign = isCredit ? "+" : "-";
+    const icon = isCredit ? "bx-trend-up" : "bx-trend-down";
+
+    const moneda = transaction.moneda?.iso || currentAccount.moneda?.codigo || "CRC";
+
     return `
         <div class="transaction-row">
             <div class="transaction-main">
@@ -351,25 +425,26 @@ function createTransactionRow(transaction) {
                     <i class='bx ${icon}'></i>
                 </div>
                 <div class="transaction-details">
-                    <div class="transaction-description">${transaction.descripcion}</div>
+                    <div class="transaction-description">${transaction.descripcion || "Movimiento"}</div>
                     <div class="transaction-meta">
                         <span>${formatDate(transaction.fecha)}</span>
                         <span class="separator">•</span>
-                        <span>ID: ${transaction.id}</span>
+                        <span>ID: ${transaction.id ? String(transaction.id).slice(0, 8) : "N/A"}</span>
                     </div>
                 </div>
             </div>
             <div class="transaction-amount-section">
                 <div class="transaction-amount ${amountClass}">
-                    ${amountSign}${formatCurrency(transaction.monto, transaction.moneda)}
+                    ${amountSign}${formatCurrency(transaction.monto, moneda)}
                 </div>
                 <div class="transaction-balance">
-                    Saldo: ${formatCurrency(transaction.saldo_posterior, transaction.moneda)}
+                    Saldo: ${formatCurrency(transaction.saldoPosterior, moneda)}
                 </div>
             </div>
         </div>
     `;
 }
+
 
 // ----------- Pagination -----------
 function updatePagination() {
@@ -393,6 +468,23 @@ function updatePagination() {
     nextBtn.disabled = currentPage === totalPages;
 }
 
+function calcularSaldos(transacciones) {
+    let saldo = 0;
+
+    return transacciones.map(tx => {
+        const tipo = tx.tipo?.nombre?.toLowerCase();
+
+        if (tipo === "credito") {
+            saldo += tx.monto;
+        } else if (tipo === "debito") {
+            saldo -= tx.monto;
+        }
+
+        return { ...tx, saldoPosterior: saldo };
+    });
+}
+
+
 function changePage(newPage) {
     const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
     
@@ -401,7 +493,6 @@ function changePage(newPage) {
         showTransactionsList();
         updatePagination();
         
-        // Scroll to top of transactions
         document.getElementById('transactionsList').scrollIntoView({ 
             behavior: 'smooth', 
             block: 'start' 
@@ -441,13 +532,19 @@ function showError(message) {
 }
 
 function retryLoadTransactions() {
-    loadTransactions();
+    init();
 }
+window.retryLoadTransactions = retryLoadTransactions;
 
 // ----------- Helper Functions -----------
-function formatCurrency(amount, currency) {
-    const symbol = currency === 'USD' ? ' : ':'₡';
-    return `${symbol}${amount.toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
+function formatCurrency(amount, currency = 'CRC') {
+    const symbol = currency === 'USD' ? '$' : '₡';
+    return `${symbol}${parseFloat(amount).toLocaleString('es-CR', { minimumFractionDigits: 2 })}`;
+}
+
+function formatIBAN(iban) {
+    if (!iban) return '****';
+    return `**** **** **** ${iban.slice(-4)}`;
 }
 
 function formatDate(dateString) {
@@ -456,7 +553,6 @@ function formatDate(dateString) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    // Check if it's today
     if (date.toDateString() === today.toDateString()) {
         return `Hoy, ${date.toLocaleTimeString('es-CR', { 
             hour: '2-digit', 
@@ -464,7 +560,6 @@ function formatDate(dateString) {
         })}`;
     }
     
-    // Check if it's yesterday
     if (date.toDateString() === yesterday.toDateString()) {
         return `Ayer, ${date.toLocaleTimeString('es-CR', { 
             hour: '2-digit', 
@@ -472,7 +567,6 @@ function formatDate(dateString) {
         })}`;
     }
     
-    // Otherwise show full date
     return date.toLocaleDateString('es-CR', {
         day: '2-digit',
         month: '2-digit',

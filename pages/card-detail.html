@@ -27,7 +27,7 @@
                     <i class='bx bx-user'></i>
                 </div>
                 <div class="user-details">
-                    <span class="user-name" id="userName">Usuario</span>
+                    <span class="user-name" id="userName">Cargando...</span>
                     <span class="user-role">Cliente</span>
                 </div>
             </div>
@@ -94,7 +94,11 @@
             <!-- Card Header -->
             <div class="card-header-section">
                 <div class="card-visual" id="cardVisual">
-                    <!-- Card will be rendered here -->
+                    <!-- Card will be rendered here dynamically -->
+                    <div class="loading-card">
+                        <i class='bx bx-loader-alt'></i>
+                        <p>Cargando información de la tarjeta...</p>
+                    </div>
                 </div>
                 <div class="card-info-summary">
                     <div class="card-status">
@@ -103,20 +107,20 @@
                     <div class="card-limits">
                         <div class="limit-item">
                             <div class="limit-label">Límite Total</div>
-                            <div class="limit-value" id="cardLimit">$15,000.00</div>
+                            <div class="limit-value" id="cardLimit">₡0.00</div>
                         </div>
                         <div class="limit-item">
                             <div class="limit-label">Disponible</div>
-                            <div class="limit-value available" id="cardAvailable">$11,749.25</div>
+                            <div class="limit-value available" id="cardAvailable">₡0.00</div>
                         </div>
                         <div class="limit-item">
                             <div class="limit-label">Consumido</div>
-                            <div class="limit-value consumed" id="cardConsumed">$3,250.75</div>
+                            <div class="limit-value consumed" id="cardConsumed">₡0.00</div>
                         </div>
                     </div>
                     <div class="usage-bar">
-                        <div class="usage-fill" id="usageBar"></div>
-                        <div class="usage-percentage" id="usagePercentage">21.7%</div>
+                        <div class="usage-fill" id="usageBar" style="width: 0%;"></div>
+                        <div class="usage-percentage" id="usagePercentage">0.0%</div>
                     </div>
                 </div>
             </div>
@@ -186,7 +190,7 @@
 
                 <!-- Transactions List -->
                 <div class="transactions-list" id="transactionsList">
-                    <!-- Transactions will be loaded here -->
+                    <!-- Transactions will be loaded here dynamically -->
                 </div>
 
                 <!-- Pagination -->
